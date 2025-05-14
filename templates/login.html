@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-5">
+                <div class="card bg-shine">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <h1 class="mb-3">Welcome Back</h1>
+                            <p class="text-secondary">Log in to your AgriConnect account</p>
+                        </div>
+                        
+                        <form method="POST" action="" class="fade-in">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="form-group mb-4">
+                                {{ form.email.label(class="form-label") }}
+                                {% if form.email.errors %}
+                                    {{ form.email(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.email(class="form-control", placeholder="Your email address") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.password.label(class="form-label") }}
+                                {% if form.password.errors %}
+                                    {{ form.password(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.password.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.password(class="form-control", placeholder="Your password") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.submit(class="btn btn-primary w-100 btn-lg") }}
+                            </div>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <p>Don't have an account? <a href="{{ url_for('register') }}" class="hover-underline">Register Now</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Section -->
+<section class="login-features">
+    <div class="container py-5">
+        <div class="row stagger-fade-in">
+            <div class="col-md-4">
+                <div class="feature-card text-center shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3>For Farmers</h3>
+                    <p>Showcase your agricultural projects and connect with investors who share your vision.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>For Investors</h3>
+                    <p>Discover high-potential agricultural ventures and make a positive impact with your investments.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Smart Matching</h3>
+                    <p>Our intelligent system connects the right farmers with the right investors based on mutual interests.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

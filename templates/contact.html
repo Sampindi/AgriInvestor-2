@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="contact-section">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1>Contact Us</h1>
+            <p class="text-secondary w-75 mx-auto">Have questions about AgriConnect? We're here to help!</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="card bg-shine">
+                    <div class="card-body p-4 p-md-5">
+                        <h2 class="mb-4">Get In Touch</h2>
+                        
+                        <form method="POST" action="" class="fade-in">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="form-group mb-4">
+                                {{ form.name.label(class="form-label") }}
+                                {% if form.name.errors %}
+                                    {{ form.name(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.name(class="form-control", placeholder="Your name") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.email.label(class="form-label") }}
+                                {% if form.email.errors %}
+                                    {{ form.email(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.email(class="form-control", placeholder="Your email address") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.subject.label(class="form-label") }}
+                                {% if form.subject.errors %}
+                                    {{ form.subject(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.subject.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.subject(class="form-control", placeholder="Subject of your message") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.message.label(class="form-label") }}
+                                {% if form.message.errors %}
+                                    {{ form.message(class="form-control is-invalid", rows=5) }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.message.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.message(class="form-control", rows=5, placeholder="Your message") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                {{ form.submit(class="btn btn-primary btn-lg") }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="contact-info card h-100">
+                    <div class="card-body p-4 p-md-5">
+                        <h2 class="mb-4">Contact Information</h2>
+                        
+                        <div class="contact-item d-flex mb-4">
+                            <div class="contact-icon me-3">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h4>Address</h4>
+                                <p>123 Agriculture Way<br>San Francisco, CA 94105<br>United States</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item d-flex mb-4">
+                            <div class="contact-icon me-3">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div>
+                                <h4>Phone</h4>
+                                <p>+1 (555) 123-4567</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item d-flex mb-4">
+                            <div class="contact-icon me-3">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div>
+                                <h4>Email</h4>
+                                <p>info@agriconnect.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item d-flex mb-4">
+                            <div class="contact-icon me-3">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <h4>Hours</h4>
+                                <p>Monday - Friday: 9:00 AM - 5:00 PM<br>Saturday - Sunday: Closed</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-social mt-5">
+                            <h4 class="mb-3">Follow Us</h4>
+                            <div class="d-flex gap-3">
+                                <a href="#" class="contact-social-link"><i class="fab fa-facebook-f"></i></a>
+                                <a href="#" class="contact-social-link"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="contact-social-link"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="contact-social-link"><i class="fab fa-linkedin-in"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="faq-section mt-5">
+            <h2 class="text-center mb-5">Frequently Asked Questions</h2>
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="dashboard-card h-100">
+                        <h4>How does AgriConnect work?</h4>
+                        <p>AgriConnect is a platform that connects farmers seeking investment with investors looking for agricultural opportunities. Farmers create projects, and our matching system helps investors find projects that align with their interests.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="dashboard-card h-100">
+                        <h4>How are investments handled?</h4>
+                        <p>Currently, AgriConnect facilitates the initial connection between farmers and investors. The actual investment terms and transfers are negotiated directly between the parties after initial introductions.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="dashboard-card h-100">
+                        <h4>Is there a fee to use AgriConnect?</h4>
+                        <p>Basic registration and browsing is free. We plan to introduce premium features in the future, but our core matching service will always remain accessible to all users.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="dashboard-card h-100">
+                        <h4>What types of agricultural projects are on AgriConnect?</h4>
+                        <p>We welcome a wide range of agricultural projects, from traditional farming to innovative agtech ventures. This includes organic farming, sustainable agriculture, precision farming, vertical farming, and more.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero" style="height: 50vh;">
+    <div class="hero-content">
+        <h1 class="hero-title animated-gradient">About AgriConnect</h1>
+        <p class="hero-subtitle">Revolutionizing agricultural investment with cutting-edge technology</p>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about">
+    <div class="container">
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="about-img tilt-on-hover">
+                    <img src="https://pixabay.com/get/ge141f745227db7c9d92a998eb4179b6348c3c699d80a576a12c8a11de132f490a8173147de803f523c594f84e798c6f64993a254ba6a3251963544a8e2fc9e2e_1280.jpg" alt="Modern Farming" class="img-fluid rounded">
+                </div>
+            </div>
+            <div class="col-lg-6 animate-on-scroll" data-animation="fade-in">
+                <h2>Our Mission</h2>
+                <p>AgriConnect was founded with a simple yet powerful vision: to bridge the gap between innovative farmers and forward-thinking investors. We believe that sustainable agriculture is the key to feeding our growing global population while preserving our planet for future generations.</p>
+                <p>Our platform leverages cutting-edge technology to create meaningful connections that drive agricultural innovation, enable sustainable farming practices, and generate returns for conscious investors.</p>
+                <a href="{{ url_for('register') }}" class="btn btn-primary mt-3">Join Our Community</a>
+            </div>
+        </div>
+
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6 order-lg-2 mb-4 mb-lg-0">
+                <div class="about-img tilt-on-hover">
+                    <img src="https://pixabay.com/get/g88f2a3a95ab9cc8e72cfaa32380a38859fef66ee9795efe17ec2eba7f6b438daf0ab2323d394232a483cce9516e55fd9d928d87689a5e153add62051d5b1e051_1280.jpg" alt="Agricultural Technology" class="img-fluid rounded">
+                </div>
+            </div>
+            <div class="col-lg-6 order-lg-1 animate-on-scroll" data-animation="fade-in">
+                <h2>The AgriConnect Advantage</h2>
+                <p>What sets AgriConnect apart is our commitment to creating a truly symbiotic ecosystem where all participants thrive. Our intelligent matching system connects farmers with investors who share their values and vision, leading to partnerships built on mutual understanding and respect.</p>
+                <p>We've developed a platform that not only facilitates financial transactions but also enables knowledge sharing, collaboration, and innovation across the agricultural sector.</p>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-12 text-center animate-on-scroll" data-animation="fade-in">
+                <h2>Our Core Values</h2>
+                <p class="mb-5">These principles guide everything we do at AgriConnect</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card h-100 shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3>Sustainability</h3>
+                    <p>We prioritize agricultural projects that protect and regenerate our natural resources while producing healthy food and stable returns.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card h-100 shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Innovation</h3>
+                    <p>We champion new ideas, technologies, and approaches that push the boundaries of what's possible in modern agriculture.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card h-100 shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <h3>Community</h3>
+                    <p>We believe in the power of connection and collaboration to create resilient food systems and thriving rural economies.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="team bg-shine">
+    <div class="container py-5">
+        <div class="text-center mb-5 animate-on-scroll" data-animation="fade-in">
+            <h2>Meet Our Team</h2>
+            <p class="text-secondary w-75 mx-auto">The passionate individuals behind AgriConnect who are dedicated to transforming agricultural investment</p>
+        </div>
+        
+        <div class="row stagger-fade-in">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center h-100">
+                    <img src="https://pixabay.com/get/g5fcdabdd50832259a43e778432f49903519955dd732817ffbcb87c513a29041a44432803f08ab2967f2df5c837e21e54f87aa5c3d5aa0f5c291aaad2265fa648_1280.jpg" class="card-img-top" alt="Team Member">
+                    <div class="card-body">
+                        <h4>Dr. Elena Rodriguez</h4>
+                        <p class="text-secondary">Founder & CEO</p>
+                        <p>Agricultural economist with 15+ years of experience in sustainable farming systems.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center h-100">
+                    <img src="https://pixabay.com/get/g384b8cdfb65db3be587c8146baa1b9c4d9aacdc1bb3a224326d7c448591d4bd9bf4d977e81455c38cff411fc8c0a3db1a54addd1a090c659e68abec3af3cb49c_1280.jpg" class="card-img-top" alt="Team Member">
+                    <div class="card-body">
+                        <h4>Michael Chen</h4>
+                        <p class="text-secondary">CTO</p>
+                        <p>Tech innovator specializing in agricultural technology and digital platforms.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center h-100">
+                    <img src="https://pixabay.com/get/gba606c9d63f2576b4011ca403d39f43d2dcb353287b94dc29d47f95cc1fd435daeaf6a124c2b98ae0dd3a20bcfad78a9a948d3b30c8ed745ecdfc2ac16db20f1_1280.jpg" class="card-img-top" alt="Team Member">
+                    <div class="card-body">
+                        <h4>Sarah Washington</h4>
+                        <p class="text-secondary">Investment Director</p>
+                        <p>Financial expert with a focus on impact investing and sustainable returns.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center h-100">
+                    <img src="https://pixabay.com/get/g6bda29a2003fbd40f470d1df1cb6f1ebc81b697b2c9e446b54bfaf71b286d91fd3a7dfa01078a006d3b1b37815a4118f9f975e1126c83ab57d17c293d024a94d_1280.jpg" class="card-img-top" alt="Team Member">
+                    <div class="card-body">
+                        <h4>David Miller</h4>
+                        <p class="text-secondary">Agricultural Specialist</p>
+                        <p>Farmer-turned-consultant with deep knowledge of regenerative practices.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Vision Section -->
+<section class="vision">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0 animate-on-scroll" data-animation="fade-in">
+                <h2>Our Vision for the Future</h2>
+                <p>At AgriConnect, we envision a world where agriculture is regenerative, resilient, and profitable. We see a future where farmers have access to the capital they need to innovate, and investors can easily support sustainable agricultural practices.</p>
+                <p>Our platform is just the beginning. We're working toward creating a comprehensive ecosystem that supports all aspects of agricultural innovation, from initial concept to widespread adoption.</p>
+                <p>Join us in shaping the future of food and farming – for the benefit of people and the planet.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="about-img tilt-on-hover">
+                    <img src="https://pixabay.com/get/g22ba9d50530964548c5fb8cf1b758e91e6e68930e7c30838e0b961f3b39e32b1ff949e2ac76417349a7144249e18af64a432c70598ffcb94da2763c5e5e35ebb_1280.jpg" alt="Agricultural Vision" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta reveal-top">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2>Ready to Be Part of the Agricultural Revolution?</h2>
+                <p class="text-secondary">Join AgriConnect today as a farmer or investor and help shape the future of sustainable agriculture.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg btn-3d">Get Started</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

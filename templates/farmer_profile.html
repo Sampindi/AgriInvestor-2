@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="profile">
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <h1>Farmer Profile</h1>
+                <p>Complete your profile to connect with investors and showcase your agricultural projects</p>
+            </div>
+            <div class="profile-body">
+                <form method="POST" action="" class="fade-in">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                {{ form.farm_name.label(class="form-label") }}
+                                {% if form.farm_name.errors %}
+                                    {{ form.farm_name(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.farm_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.farm_name(class="form-control", placeholder="Name of your farm") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                {{ form.location.label(class="form-label") }}
+                                {% if form.location.errors %}
+                                    {{ form.location(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.location.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.location(class="form-control", placeholder="City, State") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                {{ form.size.label(class="form-label") }}
+                                {% if form.size.errors %}
+                                    {{ form.size(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.size.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.size(class="form-control", placeholder="Size in acres") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                {{ form.crops.label(class="form-label") }}
+                                {% if form.crops.errors %}
+                                    {{ form.crops(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.crops.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.crops(class="form-control", placeholder="e.g. Corn, Wheat, Soybeans") }}
+                                {% endif %}
+                                <small class="text-secondary">Separate multiple items with commas</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        {{ form.technologies.label(class="form-label") }}
+                        {% if form.technologies.errors %}
+                            {{ form.technologies(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.technologies.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.technologies(class="form-control", placeholder="e.g. Precision Irrigation, Drone Monitoring, Organic Practices") }}
+                        {% endif %}
+                        <small class="text-secondary">Separate multiple items with commas</small>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        {{ form.description.label(class="form-label") }}
+                        {% if form.description.errors %}
+                            {{ form.description(class="form-control is-invalid", rows=5) }}
+                            <div class="invalid-feedback">
+                                {% for error in form.description.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.description(class="form-control", rows=5, placeholder="Tell investors about your farm, your agricultural practices, and your vision...") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group d-flex justify-content-between">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card h-100 shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3>Showcase Your Farm</h3>
+                    <p>A complete profile helps investors understand your agricultural practices and vision.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card h-100 shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Connect with Investors</h3>
+                    <p>Our matching system connects you with investors who align with your agricultural practices.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card h-100 shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Grow Your Operation</h3>
+                    <p>Access the capital you need to expand your farm and implement innovative practices.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

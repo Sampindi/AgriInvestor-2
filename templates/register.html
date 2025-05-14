@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card bg-shine">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <h1 class="mb-3">Join AgriConnect</h1>
+                            <p class="text-secondary">Create your account to connect with innovative agricultural projects and investors</p>
+                        </div>
+                        
+                        <form method="POST" action="" class="fade-in">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="form-group mb-4">
+                                {{ form.username.label(class="form-label") }}
+                                {% if form.username.errors %}
+                                    {{ form.username(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.username.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.username(class="form-control", placeholder="Choose a username") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.email.label(class="form-label") }}
+                                {% if form.email.errors %}
+                                    {{ form.email(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.email(class="form-control", placeholder="Your email address") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.user_type.label(class="form-label") }}
+                                {% if form.user_type.errors %}
+                                    {{ form.user_type(class="form-select is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.user_type.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.user_type(class="form-select") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.password.label(class="form-label") }}
+                                {% if form.password.errors %}
+                                    {{ form.password(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.password.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.password(class="form-control", placeholder="Create a secure password") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.confirm_password.label(class="form-label") }}
+                                {% if form.confirm_password.errors %}
+                                    {{ form.confirm_password(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.confirm_password.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.confirm_password(class="form-control", placeholder="Confirm your password") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.submit(class="btn btn-primary w-100 btn-lg") }}
+                            </div>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <p>Already have an account? <a href="{{ url_for('login') }}" class="hover-underline">Log In</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="feature-card bg-shine h-100 d-flex flex-column justify-content-center p-5">
+                    <div class="feature-icon mb-4">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3>Why Join AgriConnect?</h3>
+                    <ul class="mt-4">
+                        <li class="mb-3">Access to innovative agricultural projects</li>
+                        <li class="mb-3">Connect with forward-thinking investors</li>
+                        <li class="mb-3">Participate in the future of sustainable farming</li>
+                        <li class="mb-3">Secure and transparent investment process</li>
+                        <li class="mb-3">Support local and global agricultural innovation</li>
+                    </ul>
+                    <div class="mt-auto">
+                        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="AgriConnect Logo" class="img-fluid" style="max-width: 200px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

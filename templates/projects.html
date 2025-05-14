@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="projects-page">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1>Discover Agricultural Projects</h1>
+            <p class="text-secondary w-75 mx-auto">Browse innovative agricultural projects seeking investment and support</p>
+        </div>
+        
+        <!-- Search and Filter Form -->
+        <div class="dashboard-card mb-5">
+            <form method="GET" action="{{ url_for('projects') }}" class="fade-in">
+                <div class="row align-items-end">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="form-group">
+                            {{ form.query.label(class="form-label") }}
+                            {{ form.query(class="form-control", placeholder="Search projects...") }}
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0">
+                        <div class="form-group">
+                            {{ form.category.label(class="form-label") }}
+                            {{ form.category(class="form-select") }}
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0">
+                        <div class="form-group">
+                            {{ form.min_funding.label(class="form-label") }}
+                            {{ form.min_funding(class="form-control", placeholder="Min $") }}
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0">
+                        <div class="form-group">
+                            {{ form.max_funding.label(class="form-label") }}
+                            {{ form.max_funding(class="form-control", placeholder="Max $") }}
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0">
+                        <div class="form-group">
+                            {{ form.location.label(class="form-label") }}
+                            {{ form.location(class="form-control", placeholder="Location") }}
+                        </div>
+                    </div>
+                    <div class="col-md-1 text-end">
+                        {{ form.submit(class="btn btn-primary w-100") }}
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Projects Display -->
+        <div class="row stagger-fade-in">
+            {% if projects %}
+                {% for project in projects %}
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100">
+                            <img src="https://pixabay.com/get/g839a8657ad2757fe0563f9eba0af3e962e7560020a682d9fe2e2f9b20b7f10e26479ad7452edef732a7e3e6d2d92276be6259949e687c10742850d74878b6a00_1280.jpg" alt="{{ project.title }}" class="card-img-top">
+                            <div class="card-body">
+                                <h4>{{ project.title }}</h4>
+                                <p class="text-secondary mb-2"><i class="fas fa-map-marker-alt"></i> {{ project.location }}</p>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge bg-secondary">{{ project.category }}</span>
+                                    <span class="text-primary fw-bold">{{ format_currency(project.funding_goal) }}</span>
+                                </div>
+                                <p>{{ project.description|truncate(150) }}</p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-primary w-100">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <div class="dashboard-card p-5">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>No Projects Found</h3>
+                        <p class="text-secondary">Try adjusting your search filters or check back later for new projects.</p>
+                        
+                        <div class="mt-4">
+                            <a href="{{ url_for('projects') }}" class="btn btn-primary">Clear Filters</a>
+                            {% if current_user.is_authenticated and current_user.user_type == 'farmer' %}
+                                <a href="{{ url_for('new_project') }}" class="btn btn-secondary ms-3">Create a Project</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

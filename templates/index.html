@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title animated-gradient">Cultivating Tomorrow's Agriculture</h1>
+        <p class="hero-subtitle">Connecting innovative farmers with forward-thinking investors to grow the future of sustainable farming.</p>
+        <div class="d-flex justify-content-center gap-3">
+            {% if current_user.is_authenticated %}
+                {% if current_user.user_type == 'farmer' %}
+                    <a href="{{ url_for('new_project') }}" class="btn btn-primary btn-lg btn-cta">Start a Project</a>
+                {% elif current_user.user_type == 'investor' %}
+                    <a href="{{ url_for('opportunities') }}" class="btn btn-primary btn-lg btn-cta">Find Opportunities</a>
+                {% endif %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline btn-lg">My Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg btn-cta">Join Today</a>
+                <a href="{{ url_for('about') }}" class="btn btn-outline btn-lg">Learn More</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">The Future of Agricultural Investment</h2>
+            <p class="text-secondary w-75 mx-auto">AgriConnect brings together farmers with innovative ideas and investors seeking sustainable opportunities in agriculture.</p>
+        </div>
+        
+        <div class="row stagger-fade-in">
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3>For Farmers</h3>
+                    <p>Showcase your agricultural projects and connect with investors who share your vision for sustainable farming.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>For Investors</h3>
+                    <p>Discover high-potential agricultural ventures and make a positive impact with your investments.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Smart Matching</h3>
+                    <p>Our intelligent system connects the right farmers with the right investors based on mutual interests.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Projects Section -->
+<section class="projects bg-shine">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h2>Featured Projects</h2>
+            <a href="{{ url_for('projects') }}" class="btn btn-outline">View All</a>
+        </div>
+        
+        <div class="row stagger-fade-in">
+            {% if projects %}
+                {% for project in projects %}
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="project-card">
+                            <img src="https://pixabay.com/get/g839a8657ad2757fe0563f9eba0af3e962e7560020a682d9fe2e2f9b20b7f10e26479ad7452edef732a7e3e6d2d92276be6259949e687c10742850d74878b6a00_1280.jpg" alt="{{ project.title }}" class="project-card-img">
+                            <div class="project-card-overlay">
+                                <h3 class="project-card-title">{{ project.title }}</h3>
+                                <p class="project-card-location"><i class="fas fa-map-marker-alt"></i> {{ project.location }}</p>
+                                <p class="project-card-funding">{{ format_currency(project.funding_goal) }}</p>
+                                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-sm btn-primary mt-2">View Project</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <div class="card p-5">
+                        <h3>No projects available yet</h3>
+                        <p>Be the first to create an agricultural project!</p>
+                        <a href="{{ url_for('register') }}" class="btn btn-primary mt-3">Join Now</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">How AgriConnect Works</h2>
+            <p class="text-secondary w-75 mx-auto">Our platform makes it easy for farmers to find funding and for investors to discover agricultural opportunities.</p>
+        </div>
+        
+        <div class="row stagger-fade-in">
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h4>1. Sign Up</h4>
+                    <p>Create your profile as a farmer or investor and tell us about your goals.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h4>2. Create or Browse</h4>
+                    <p>Farmers create projects, investors browse opportunities that match their interests.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h4>3. Connect</h4>
+                    <p>When there's mutual interest, start a conversation through our secure messaging system.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h4>4. Collaborate</h4>
+                    <p>Form partnerships and grow together with sustainable agricultural investments.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials reveal-bottom">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">Success Stories</h2>
+            <p class="text-secondary w-75 mx-auto">See how AgriConnect is transforming agricultural funding and innovation.</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="testimonial-card float-on-hover">
+                    <p class="testimonial-text">"As a small organic farm, finding investors who understood our vision was challenging. AgriConnect connected us with the perfect partners who helped us expand our operations sustainably."</p>
+                    <div class="testimonial-author">
+                        <img src="https://pixabay.com/get/g54b2f5d288231e280461b470150ca13c0a8135769984ef0229ba65b472eee72b26a6b000e5c9a1462844441477991537b3767a7a061c3a0aa725ae38f534cc62_1280.jpg" alt="James Wilson" class="testimonial-avatar">
+                        <div>
+                            <div class="testimonial-name">James Wilson</div>
+                            <div class="testimonial-role">Organic Farmer, Green Valley Farm</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="testimonial-card float-on-hover">
+                    <p class="testimonial-text">"I've been looking to diversify my investment portfolio with sustainable ventures. Through AgriConnect, I found several innovative agricultural projects that aligned perfectly with my investment strategy."</p>
+                    <div class="testimonial-author">
+                        <img src="https://pixabay.com/get/g47214d070798abedcdb7dd98f1f970d67e088bc86a2ae88edd6d77039ef6b0707ee11ea335e259fa33ae2d591ea109dcd5b3d4681f65f86ce0a484868e00f045_1280.jpg" alt="Sarah Johnson" class="testimonial-avatar">
+                        <div>
+                            <div class="testimonial-name">Sarah Johnson</div>
+                            <div class="testimonial-role">Angel Investor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats bg-shine">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-3 col-6">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-number counter" data-target="500">0</div>
+                    <div class="stats-text">Farmers Connected</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="stats-number counter" data-target="350">0</div>
+                    <div class="stats-text">Active Projects</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="stats-number counter" data-target="200">0</div>
+                    <div class="stats-text">Investors</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stats-number counter" data-target="10">0</div>
+                    <div class="stats-text">Million $ Funded</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta reveal-top">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2>Ready to Transform the Future of Agriculture?</h2>
+                <p class="text-secondary">Join AgriConnect today and be part of the agricultural revolution.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg btn-3d">Get Started</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

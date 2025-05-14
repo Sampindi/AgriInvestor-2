@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="dashboard">
+    <div class="container">
+        <div class="dashboard-header mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1>
+                        {% if current_user.user_type == 'farmer' %}
+                            Farmer Dashboard
+                        {% else %}
+                            Investor Dashboard
+                        {% endif %}
+                    </h1>
+                    <p class="text-secondary">
+                        {% if current_user.user_type == 'farmer' %}
+                            Manage your agricultural projects and connect with investors
+                        {% else %}
+                            Discover and track agricultural investment opportunities
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    {% if current_user.user_type == 'farmer' %}
+                        <a href="{{ url_for('new_project') }}" class="btn btn-primary btn-lg"><i class="fas fa-plus"></i> Create New Project</a>
+                    {% else %}
+                        <a href="{{ url_for('opportunities') }}" class="btn btn-primary btn-lg"><i class="fas fa-search"></i> Find Opportunities</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Overview -->
+        <div class="row mb-5">
+            <div class="col-lg-4 mb-4">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-title">
+                        <h3>Profile Overview</h3>
+                        <a href="{{ url_for('profile') }}" class="btn btn-sm btn-outline">Edit</a>
+                    </div>
+                    {% if current_user.profile %}
+                        {% if current_user.user_type == 'farmer' %}
+                            <div class="profile-info-item">
+                                <div class="profile-info-label">Farm Name:</div>
+                                <div class="profile-info-value">{{ current_user.profile.farm_name }}</div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-label">Location:</div>
+                                <div class="profile-info-value">{{ current_user.profile.location }}</div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-label">Farm Size:</div>
+                                <div class="profile-info-value">{{ current_user.profile.size }}</div>
+                            </div>
+                        {% else %}
+                            <div class="profile-info-item">
+                                <div class="profile-info-label">Company:</div>
+                                <div class="profile-info-value">{{ current_user.profile.company_name or 'Not specified' }}</div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-label">Investment Range:</div>
+                                <div class="profile-info-value">
+                                    {% if current_user.profile.min_investment and current_user.profile.max_investment %}
+                                        {{ format_currency(current_user.profile.min_investment) }} - {{ format_currency(current_user.profile.max_investment) }}
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-label">Focus Areas:</div>
+                                <div class="profile-info-value">
+                                    {% if current_user.profile.investment_focus %}
+                                        {{ ", ".join(current_user.profile.investment_focus) }}
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>Your profile is not complete. Please <a href="{{ url_for('profile') }}">complete your profile</a> to get the most out of AgriConnect.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="col-lg-8">
+                <div class="row">
+                    {% if current_user.user_type == 'farmer' %}
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-project-diagram"></i>
+                                </div>
+                                <div class="stats-number">{{ projects|length }}</div>
+                                <div class="stats-text">Active Projects</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="stats-number">
+                                    {% set total_funding = 0 %}
+                                    {% for project in projects %}
+                                        {% set total_funding = total_funding + project.funding_goal %}
+                                    {% endfor %}
+                                    {{ format_currency(total_funding) }}
+                                </div>
+                                <div class="stats-text">Total Funding Goal</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stats-number">0</div>
+                                <div class="stats-text">Investor Connections</div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-search-dollar"></i>
+                                </div>
+                                <div class="stats-number">{{ projects|length }}</div>
+                                <div class="stats-text">Matching Projects</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-hand-holding-usd"></i>
+                                </div>
+                                <div class="stats-number">{{ investments|length }}</div>
+                                <div class="stats-text">Active Investments</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="stats-number">
+                                    {% set total_invested = 0 %}
+                                    {% for investment in investments %}
+                                        {% set total_invested = total_invested + investment.amount %}
+                                    {% endfor %}
+                                    {{ format_currency(total_invested) }}
+                                </div>
+                                <div class="stats-text">Total Invested</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if current_user.user_type == 'farmer' %}
+            <!-- Farmer's Projects -->
+            <div class="dashboard-card mb-5">
+                <div class="dashboard-card-title mb-4">
+                    <h3>My Projects</h3>
+                    <a href="{{ url_for('new_project') }}" class="btn btn-sm btn-primary">New Project</a>
+                </div>
+                
+                {% if projects %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Project</th>
+                                    <th>Location</th>
+                                    <th>Category</th>
+                                    <th>Funding Goal</th>
+                                    <th>Created</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in projects %}
+                                    <tr>
+                                        <td>{{ project.title }}</td>
+                                        <td>{{ project.location }}</td>
+                                        <td>{{ project.category }}</td>
+                                        <td>{{ format_currency(project.funding_goal) }}</td>
+                                        <td>{{ format_date(project.created_at) }}</td>
+                                        <td><span class="project-status status-active">Active</span></td>
+                                        <td>
+                                            <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-sm btn-outline">View</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <h4>No Projects Yet</h4>
+                        <p class="text-secondary">Start showcasing your agricultural projects to potential investors</p>
+                        <a href="{{ url_for('new_project') }}" class="btn btn-primary mt-3">Create Your First Project</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <!-- Investor's Matching Projects -->
+            <div class="dashboard-card mb-5">
+                <div class="dashboard-card-title mb-4">
+                    <h3>Matching Projects</h3>
+                    <a href="{{ url_for('opportunities') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                
+                {% if projects %}
+                    <div class="row">
+                        {% for project in projects[:3] %}
+                            <div class="col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <img src="https://pixabay.com/get/g839a8657ad2757fe0563f9eba0af3e962e7560020a682d9fe2e2f9b20b7f10e26479ad7452edef732a7e3e6d2d92276be6259949e687c10742850d74878b6a00_1280.jpg" alt="{{ project.title }}" class="card-img-top">
+                                    <div class="card-body">
+                                        <h4>{{ project.title }}</h4>
+                                        <p class="text-secondary mb-2"><i class="fas fa-map-marker-alt"></i> {{ project.location }}</p>
+                                        <p>{{ project.description|truncate(100) }}</p>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar" role="progressbar" style="width: 0%" data-width="0"></div>
+                                        </div>
+                                        <p class="d-flex justify-content-between">
+                                            <span>Funding Goal:</span>
+                                            <span class="text-primary">{{ format_currency(project.funding_goal) }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-primary w-100">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if projects|length > 3 %}
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('opportunities') }}" class="btn btn-outline">View All Projects</a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-search-dollar"></i>
+                        </div>
+                        <h4>No Matching Projects</h4>
+                        <p class="text-secondary">Complete your investor profile to get matched with relevant agricultural projects</p>
+                        <a href="{{ url_for('profile') }}" class="btn btn-primary mt-3">Complete Your Profile</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Investor's Active Investments -->
+            <div class="dashboard-card mb-5">
+                <div class="dashboard-card-title mb-4">
+                    <h3>My Investments</h3>
+                </div>
+                
+                {% if investments %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Project</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for investment in investments %}
+                                    {% set project = project_dict.get(investment.project_id) %}
+                                    <tr>
+                                        <td>{{ project.title if project else 'Unknown Project' }}</td>
+                                        <td>{{ format_currency(investment.amount) }}</td>
+                                        <td>{{ format_date(investment.created_at) }}</td>
+                                        <td><span class="project-status status-pending">{{ investment.status }}</span></td>
+                                        <td>
+                                            <a href="{{ url_for('project_detail', project_id=investment.project_id) }}" class="btn btn-sm btn-outline">View Project</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <h4>No Investments Yet</h4>
+                        <p class="text-secondary">Start investing in promising agricultural projects</p>
+                        <a href="{{ url_for('opportunities') }}" class="btn btn-primary mt-3">Browse Opportunities</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

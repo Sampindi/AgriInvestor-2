@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="profile">
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <h1>Investor Profile</h1>
+                <p>Complete your profile to discover agricultural projects that match your investment interests</p>
+            </div>
+            <div class="profile-body">
+                <form method="POST" action="" class="fade-in">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                {{ form.company_name.label(class="form-label") }}
+                                {% if form.company_name.errors %}
+                                    {{ form.company_name(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.company_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.company_name(class="form-control", placeholder="Company name (if applicable)") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                {{ form.preferred_locations.label(class="form-label") }}
+                                {% if form.preferred_locations.errors %}
+                                    {{ form.preferred_locations(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.preferred_locations.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.preferred_locations(class="form-control", placeholder="e.g. California, Midwest, Southeast") }}
+                                {% endif %}
+                                <small class="text-secondary">Separate multiple locations with commas</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                {{ form.min_investment.label(class="form-label") }}
+                                {% if form.min_investment.errors %}
+                                    {{ form.min_investment(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.min_investment.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.min_investment(class="form-control", placeholder="Minimum investment amount in USD") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                {{ form.max_investment.label(class="form-label") }}
+                                {% if form.max_investment.errors %}
+                                    {{ form.max_investment(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.max_investment.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.max_investment(class="form-control", placeholder="Maximum investment amount in USD") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        {{ form.investment_focus.label(class="form-label") }}
+                        {% if form.investment_focus.errors %}
+                            <div class="form-control is-invalid">
+                                {% for option in form.investment_focus %}
+                                    <div class="form-check form-check-inline">
+                                        {{ option(class="form-check-input") }}
+                                        {{ option.label(class="form-check-label") }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="invalid-feedback">
+                                {% for error in form.investment_focus.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div>
+                                {% for option in form.investment_focus %}
+                                    <div class="form-check form-check-inline">
+                                        {{ option(class="form-check-input") }}
+                                        {{ option.label(class="form-check-label") }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        {{ form.interests.label(class="form-label") }}
+                        {% if form.interests.errors %}
+                            {{ form.interests(class="form-control is-invalid", rows=4) }}
+                            <div class="invalid-feedback">
+                                {% for error in form.interests.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.interests(class="form-control", rows=4, placeholder="Describe your investment interests, goals, and what types of agricultural projects you're looking for...") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group d-flex justify-content-between">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card h-100 shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Find Perfect Matches</h3>
+                    <p>Our matching algorithm finds agricultural projects that align with your investment criteria and preferences.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card h-100 shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <h3>Impact Investments</h3>
+                    <p>Support sustainable agricultural practices while generating returns on your investments.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card h-100 shimmer-on-hover">
+                    <div class="feature-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Direct Relationships</h3>
+                    <p>Connect directly with farmers and build meaningful relationships with the people behind your investments.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="60" viewBox="0 0 240 60">
+  <defs>
+    <linearGradient id="agriConnectGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2CB67D" />
+      <stop offset="100%" stop-color="#7F5AF0" />
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#agriConnectGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Plant icon -->
+    <path d="M30 50C30 36.67 20 30 10 30C10 43.33 20 50 30 50Z" fill="rgba(44, 182, 125, 0.2)" />
+    <path d="M30 50C30 36.67 40 30 50 30C50 43.33 40 50 30 50Z" fill="rgba(44, 182, 125, 0.2)" />
+    <line x1="30" y1="50" x2="30" y2="10" />
+    
+    <!-- Connection lines -->
+    <path d="M42 20C52 15 57 25 60 35" stroke-dasharray="3,3" />
+    <path d="M18 20C8 15 3 25 0 35" stroke-dasharray="3,3" />
+    
+    <!-- Investment/coin icon -->
+    <circle cx="30" cy="25" r="7" fill="rgba(127, 90, 240, 0.2)" />
+    <circle cx="30" cy="25" r="3" fill="none" />
+  </g>
+  
+  <!-- Text part -->
+  <text x="65" y="35" font-family="'Montserrat', sans-serif" font-size="24" font-weight="700" fill="url(#agriConnectGradient)">
+    AgriConnect
+  </text>
+  <text x="65" y="50" font-family="'Raleway', sans-serif" font-size="12" fill="#94A1B2">
+    Farming Future · Growing Investments
+  </text>
+</svg>
