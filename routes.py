@@ -1,17 +1,17 @@
 import os
 import datetime
-from flask import render_template, url_for, flash, redirect, request, session, abort, current_app
+from flask import render_template, url_for, flash, redirect, request, session, abort, current_app, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from app import app, db, socketio
 from sqlalchemy import func
-from models import User, FarmerProfile, InvestorProfile, Project, Investment, Message, FarmImage, ProjectImage, FarmerRating
+from models import User, FarmerProfile, InvestorProfile, Project, Investment, Message, FarmImage, ProjectImage, FarmerRating, Activity
 from forms import (
     LoginForm, RegistrationForm, FarmerProfileForm, 
     InvestorProfileForm, ProjectForm, InvestmentForm, ContactForm, MessageForm, 
     SearchForm
 )
-from utils import parse_comma_separated, format_currency, format_date
+from utils import parse_comma_separated, format_currency, format_date, record_activity
 from recommendation_engine import RecommendationEngine
 import logging
 
@@ -96,6 +96,17 @@ def register():
 
             db.session.add(user)
             db.session.commit()
+
+            # Record activity for admin dashboard
+            record_activity(
+                db, 
+                socketio, 
+                'user_registration', 
+                'New User Registration', 
+                f"User {user.username} has registered as a {user.user_type}.",
+                user_id=user.id,
+                icon='fa-user-plus'
+            )
 
             flash(f'Account created successfully! You can now log in.', 'success')
             return redirect(url_for('login'))
@@ -567,6 +578,18 @@ def new_project():
         db.session.add(project)
         db.session.commit()
 
+        # Record activity for admin dashboard
+        record_activity(
+            db, 
+            socketio, 
+            'new_project', 
+            'New Project Created', 
+            f"{current_user.username} created a new project: {project.title}",
+            user_id=current_user.id,
+            project_id=project.id,
+            icon='fa-project-diagram'
+        )
+
         flash('Your project has been created!', 'success')
         return redirect(url_for('project_detail', project_id=project.id))
 
@@ -869,6 +892,92 @@ def handle_connect():
         room = f'user_{current_user.id}'
         join_room(room)
         logger.debug(f"User {current_user.username} joined room {room}")
+        
+        # If the user is an admin, also join the admin room
+        if current_user.user_type == 'admin':
+            join_room('admin_room')
+            logger.debug(f"Admin {current_user.username} joined admin_room")
+
+@app.route('/admin/activities', methods=['GET'])
+@login_required
+def admin_activities():
+    """Get recent activities for admin dashboard."""
+    if current_user.user_type != 'admin':
+        abort(403)
+    
+    # Get recent activities, limit to 20
+    activities = Activity.query.order_by(Activity.created_at.desc()).limit(20).all()
+    
+    # Convert to dict for JSON response
+    activity_list = []
+    for activity in activities:
+        activity_dict = {
+            'id': activity.id,
+            'activity_type': activity.activity_type,
+            'title': activity.title,
+            'description': activity.description,
+            'icon': activity.icon,
+            'created_at': activity.created_at.isoformat(),
+            'time_ago': activity.time_ago
+        }
+        
+        # Add user info if available
+        if activity.user:
+            activity_dict['user'] = {
+                'id': activity.user.id,
+                'username': activity.user.username
+            }
+        
+        # Add related user info if available
+        if activity.related_user:
+            activity_dict['related_user'] = {
+                'id': activity.related_user.id,
+                'username': activity.related_user.username
+            }
+        
+        # Add project info if available
+        if activity.project:
+            activity_dict['project'] = {
+                'id': activity.project.id,
+                'title': activity.project.title
+            }
+        
+        activity_list.append(activity_dict)
+    
+    return jsonify({
+        'success': True,
+        'activities': activity_list
+    })
+
+@app.route('/admin/activities/clear', methods=['POST'])
+@login_required
+def clear_activities():
+    """Clear all activities for admin dashboard."""
+    if current_user.user_type != 'admin':
+        abort(403)
+    
+    try:
+        # Delete all activities
+        Activity.query.delete()
+        db.session.commit()
+        
+        # Emit activity cleared event to admin room
+        socketio.emit('activities_cleared', {
+            'success': True,
+            'message': 'All activities have been cleared'
+        }, room='admin_room')
+        
+        return jsonify({
+            'success': True,
+            'message': 'All activities have been cleared'
+        })
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error clearing activities: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while clearing activities'
+        }), 500
 
 @app.errorhandler(404)
 def page_not_found(e):
