@@ -718,47 +718,55 @@
                                 <h3 class="mb-1">{{ current_user.username }}</h3>
                                 <p class="text-secondary">{{ current_user.email }}</p>
                                 
-                                {% if current_user.investor_profile.company_name %}
+                                {% if current_user.investor_profile and current_user.investor_profile.company_name %}
                                     <div class="company-badge mb-3">
                                         <span class="badge-modern badge-info">{{ current_user.investor_profile.company_name }}</span>
                                     </div>
                                 {% endif %}
                             </div>
                             
-                            <div class="profile-info-item">
-                                <div class="profile-info-label">Company:</div>
-                                <div class="profile-info-value">{{ current_user.investor_profile.company_name or 'Not specified' }}</div>
-                            </div>
-                            <div class="profile-info-item">
-                                <div class="profile-info-label">Investment Range:</div>
-                                <div class="profile-info-value">
-                                    {% if current_user.investor_profile.min_investment and current_user.investor_profile.max_investment %}
-                                        {{ format_currency(current_user.investor_profile.min_investment) }} - {{ format_currency(current_user.investor_profile.max_investment) }}
-                                    {% else %}
-                                        Not specified
-                                    {% endif %}
+                            {% if current_user.investor_profile %}
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">Company:</div>
+                                    <div class="profile-info-value">{{ current_user.investor_profile.company_name or 'Not specified' }}</div>
                                 </div>
-                            </div>
-                            <div class="profile-info-item">
-                                <div class="profile-info-label">Focus Areas:</div>
-                                <div class="profile-info-value">
-                                    {% if current_user.investor_profile.investment_focus %}
-                                        <div class="d-flex flex-wrap gap-1">
-                                            {% for focus in current_user.investor_profile.investment_focus.split(',') %}
-                                                <span class="badge-modern badge-info">{{ focus.strip() }}</span>
-                                            {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        Not specified
-                                    {% endif %}
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">Investment Range:</div>
+                                    <div class="profile-info-value">
+                                        {% if current_user.investor_profile.min_investment and current_user.investor_profile.max_investment %}
+                                            {{ format_currency(current_user.investor_profile.min_investment) }} - {{ format_currency(current_user.investor_profile.max_investment) }}
+                                        {% else %}
+                                            Not specified
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="profile-info-item">
-                                <div class="profile-info-label">Preferred Locations:</div>
-                                <div class="profile-info-value">
-                                    {{ current_user.investor_profile.preferred_locations or 'Not specified' }}
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">Focus Areas:</div>
+                                    <div class="profile-info-value">
+                                        {% if current_user.investor_profile.investment_focus %}
+                                            <div class="d-flex flex-wrap gap-1">
+                                                {% for focus in current_user.investor_profile.investment_focus.split(',') %}
+                                                    <span class="badge-modern badge-info">{{ focus.strip() }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            Not specified
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">Preferred Locations:</div>
+                                    <div class="profile-info-value">
+                                        {{ current_user.investor_profile.preferred_locations or 'Not specified' }}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <p class="mb-3"><i class="fas fa-info-circle me-2"></i>You haven't created your investor profile yet.</p>
+                                    <p>Complete your profile to discover agricultural projects and connect with farmers looking for funding.</p>
+                                    <a href="{{ url_for('profile') }}" class="btn btn-primary mt-3">Create Profile</a>
+                                </div>
+                            {% endif %}
                         </div>
                     {% else %}
                         <div class="alert alert-info">
