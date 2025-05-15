@@ -161,10 +161,7 @@ function initializeAdminCharts() {
                     }
                 },
                 cutout: '65%',
-                animation: {
-                    animateScale: true,
-                    animateRotate: true
-                }
+                animation: false
             }
         });
     }
@@ -211,10 +208,7 @@ function initializeAdminCharts() {
                         cornerRadius: 8
                     }
                 },
-                animation: {
-                    animateScale: true,
-                    animateRotate: true
-                }
+                animation: false
             }
         });
     }
