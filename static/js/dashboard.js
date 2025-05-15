@@ -3,8 +3,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize all charts and dashboard components
     initializeCharts();
-    initializeAnimations();
-    initializeDashboardCards();
+    // Disabled animations per user request
+    // initializeAnimations();
+    // initializeDashboardCards();
 });
 
 // Initialize Chart.js visualizations
@@ -102,14 +103,7 @@ function initializeAdminCharts() {
                     axis: 'x',
                     intersect: false
                 },
-                animations: {
-                    tension: {
-                        duration: 1000,
-                        easing: 'easeInOutQuad',
-                        from: 0.4,
-                        to: 0.4
-                    }
-                }
+                animations: false
             }
         });
     }

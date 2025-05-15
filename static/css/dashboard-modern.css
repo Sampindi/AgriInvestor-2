@@ -301,23 +301,13 @@
     font-weight: 500;
     font-size: 0.9rem;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .dashboard-action:hover {
     background: linear-gradient(145deg, rgba(44, 182, 125, 0.2), rgba(22, 22, 26, 0.7));
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     color: var(--primary-color);
-}
-
-.dashboard-action i {
-    transition: transform 0.3s ease;
-}
-
-.dashboard-action:hover i {
-    transform: translateX(3px);
 }
 
 /* Summary Cards */
@@ -328,7 +318,6 @@
     margin-bottom: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
 }
@@ -341,11 +330,6 @@
     width: 4px;
     height: 100%;
     background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
-    transition: width 0.3s ease;
-}
-
-.summary-card:hover::before {
-    width: 8px;
 }
 
 .summary-title {
@@ -406,9 +390,10 @@
     font-size: 0.9rem;
 }
 
-/* Hover Glow Effect */
+/* Static Glow Effect */
 .glow-on-hover {
     position: relative;
+    box-shadow: 0 0 20px rgba(44, 182, 125, 0.1);
 }
 
 .glow-on-hover::after {
@@ -419,15 +404,10 @@
     right: 0;
     bottom: 0;
     border-radius: var(--border-radius);
-    background: radial-gradient(circle at center, rgba(44, 182, 125, 0.5), transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    background: radial-gradient(circle at center, rgba(44, 182, 125, 0.2), transparent 70%);
+    opacity: 0.1;
     pointer-events: none;
     z-index: -1;
-}
-
-.glow-on-hover:hover::after {
-    opacity: 0.3;
 }
 
 /* Responsive Adaptations */
