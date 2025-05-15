@@ -7,7 +7,7 @@ from app import app, db, socketio
 from sqlalchemy import func
 from models import User, FarmerProfile, InvestorProfile, Project, Investment, Message, FarmImage, ProjectImage, FarmerRating
 from forms import (
-    LoginForm, RegistrationForm, AdminRegistrationForm, FarmerProfileForm, 
+    LoginForm, RegistrationForm, FarmerProfileForm, 
     InvestorProfileForm, ProjectForm, InvestmentForm, ContactForm, MessageForm, 
     SearchForm
 )

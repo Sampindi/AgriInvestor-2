@@ -8,9 +8,23 @@ logger = logging.getLogger(__name__)
 with app.app_context():
     # Import models
     import models
+    from models import User
     # Create tables
     db.create_all()
-    logger.info("Database tables created")
+    
+    # Create admin user if it doesn't exist
+    admin = User.query.filter_by(email='admin@gmail.com').first()
+    if not admin:
+        admin = User(
+            username='admin',
+            email='admin@gmail.com',
+            user_type='admin'
+        )
+        admin.set_password('admin123')
+        db.session.add(admin)
+        db.session.commit()
+    
+    logger.info("Database tables created and admin user configured")
 
 # Import routes after tables are created
 from routes import *
