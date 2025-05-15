@@ -558,55 +558,14 @@
                     <div class="dashboard-card glow-on-hover">
                         <div class="dashboard-card-title">
                             <h3><i class="fas fa-bell me-2"></i> Recent Activity</h3>
+                            <button id="clearActivitiesBtn" class="btn-modern btn-sm">
+                                <i class="fas fa-trash me-1"></i> Clear
+                            </button>
                         </div>
-                        <div class="activity-feed">
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">New User Registration</div>
-                                    <div class="activity-description">
-                                        User <strong>johndoe</strong> has registered as a farmer.
-                                    </div>
-                                    <div class="activity-time">2 hours ago</div>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-project-diagram"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">New Project Created</div>
-                                    <div class="activity-description">
-                                        <strong>Organic Wheat Farm Expansion</strong> created by <strong>farmerbob</strong>.
-                                    </div>
-                                    <div class="activity-time">5 hours ago</div>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-dollar-sign"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Investment Made</div>
-                                    <div class="activity-description">
-                                        <strong>investor123</strong> invested $5,000 in <strong>Sustainable Irrigation Project</strong>.
-                                    </div>
-                                    <div class="activity-time">Yesterday</div>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Project Fully Funded</div>
-                                    <div class="activity-description">
-                                        <strong>Greenhouse Expansion</strong> reached 100% of funding goal.
-                                    </div>
-                                    <div class="activity-time">3 days ago</div>
-                                </div>
+                        <div id="activity-feed" class="activity-feed">
+                            <!-- Activity items will be loaded here -->
+                            <div id="no-activities-message" class="text-center p-4" style="display: none;">
+                                <p>No recent activities</p>
                             </div>
                         </div>
                     </div>

@@ -645,6 +645,20 @@ def project_detail(project_id):
             db.session.add(investment)
             db.session.commit()
 
+            # Record activity for admin dashboard
+            record_activity(
+                db, 
+                socketio, 
+                'investment', 
+                'New Investment Made', 
+                f"{current_user.username} invested ${investment.amount} in {project.title}",
+                user_id=current_user.id,
+                related_user_id=project.farmer_id,
+                project_id=project.id,
+                investment_id=investment.id,
+                icon='fa-dollar-sign'
+            )
+
             flash('Your investment has been submitted!', 'success')
             return redirect(url_for('project_detail', project_id=project_id))
 
@@ -703,6 +717,9 @@ def admin():
     farmers = User.query.filter_by(user_type='farmer').all()
     investors = User.query.filter_by(user_type='investor').all()
     projects = Project.query.all()
+    
+    # Get recent activities for admin dashboard
+    recent_activities = Activity.query.order_by(Activity.created_at.desc()).limit(10).all()
 
     return render_template('admin.html', 
                           title='Admin Panel', 
@@ -710,6 +727,7 @@ def admin():
                           users=users,
                           farmers=farmers,
                           investors=investors,
+                          recent_activities=recent_activities,
                           projects=projects)
 
 @app.route('/request_connection/<int:user_id>', methods=['POST'])
