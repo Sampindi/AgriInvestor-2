@@ -50,27 +50,27 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
 
+    # Always ensure admin exists
+    admin = User.query.filter_by(email='admin@gmail.com').first()
+    if not admin:
+        try:
+            admin = User(
+                username='admin',
+                email='admin@gmail.com',
+                user_type='admin'
+            )
+            admin.set_password('admin123')
+            db.session.add(admin)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error creating admin user: {e}")
+
     form = LoginForm()
     if form.validate_on_submit():
-        # First check if admin needs to be created
         if form.email.data == 'admin@gmail.com' and form.password.data == 'admin123':
-            # Create admin user if doesn't exist
+            # Login the admin
             admin = User.query.filter_by(email='admin@gmail.com').first()
-            if not admin:
-                try:
-                    admin = User(
-                        username='admin',
-                        email='admin@gmail.com',
-                        user_type='admin'
-                    )
-                    admin.set_password('admin123')
-                    db.session.add(admin)
-                    db.session.commit()
-                except Exception as e:
-                    db.session.rollback()
-                    flash('Error creating admin user.', 'danger')
-                    return render_template('login.html', title='Login', app_name=APP_NAME, form=form)
-
             # Login the admin
             login_user(admin)
             admin.last_login = datetime.datetime.utcnow()
@@ -864,6 +864,8 @@ def chat(user_id):
 
 # Import Flask-SocketIO functions
 from flask_socketio import emit, join_room
+# WebSocket setup for chat
+@flask_socketio import emit, join_room
 # WebSocket setup for chat
 @socketio.on('send_message')
 def handle_message(data):
