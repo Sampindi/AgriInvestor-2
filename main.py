@@ -12,17 +12,26 @@ with app.app_context():
     # Create tables
     db.create_all()
     
-    # Create admin user if it doesn't exist
-    admin = User.query.filter_by(email='admin@gmail.com').first()
+    # Check if admin user exists and update if needed
+    admin = User.query.filter_by(username='admin').first()
     if not admin:
+        # Create new admin user
         admin = User(
             username='admin',
-            email='admin@gmail.com',
+            email='admin@farmlink.com',
             user_type='admin'
         )
-        admin.set_password('admin123')
+        admin.set_password('FarmLink@Admin2025')
         db.session.add(admin)
         db.session.commit()
+        logger.info("Admin user created - Username: admin, Email: admin@farmlink.com")
+    else:
+        # Update existing admin user
+        admin.email = 'admin@farmlink.com'
+        admin.user_type = 'admin'
+        admin.set_password('FarmLink@Admin2025')
+        db.session.commit()
+        logger.info("Admin user updated - Username: admin, Email: admin@farmlink.com")
     
     logger.info("Database tables created and admin user configured")
 
