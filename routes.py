@@ -141,10 +141,8 @@ def create_admin():
                               password="[HIDDEN]")
     
     try:
-        # Generate a random password
-        import string
-        import random
-        password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+        # Use fixed admin password
+        password = 'admin123'
         
         # Create the admin user
         admin = User(
