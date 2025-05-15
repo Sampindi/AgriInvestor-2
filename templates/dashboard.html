@@ -214,48 +214,48 @@
                         <a href="{{ url_for('profile') }}" class="btn btn-sm btn-outline">Edit</a>
                     </div>
                     {% if current_user.user_type == 'farmer' and current_user.farmer_profile %}
-                            <div class="profile-info-item">
-                                <div class="profile-info-label">Farm Name:</div>
-                                <div class="profile-info-value">{{ current_user.farmer_profile.farm_name }}</div>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Farm Name:</div>
+                            <div class="profile-info-value">{{ current_user.farmer_profile.farm_name }}</div>
+                        </div>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Location:</div>
+                            <div class="profile-info-value">{{ current_user.farmer_profile.location }}</div>
+                        </div>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Farm Size:</div>
+                            <div class="profile-info-value">{{ current_user.farmer_profile.size }}</div>
+                        </div>
+                    {% elif current_user.user_type == 'investor' and current_user.investor_profile %}
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Company:</div>
+                            <div class="profile-info-value">{{ current_user.investor_profile.company_name or 'Not specified' }}</div>
+                        </div>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Investment Range:</div>
+                            <div class="profile-info-value">
+                                {% if current_user.investor_profile.min_investment and current_user.investor_profile.max_investment %}
+                                    {{ format_currency(current_user.investor_profile.min_investment) }} - {{ format_currency(current_user.investor_profile.max_investment) }}
+                                {% else %}
+                                    Not specified
+                                {% endif %}
                             </div>
-                            <div class="profile-info-item">
-                                <div class="profile-info-label">Location:</div>
-                                <div class="profile-info-value">{{ current_user.farmer_profile.location }}</div>
+                        </div>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Focus Areas:</div>
+                            <div class="profile-info-value">
+                                {% if current_user.investor_profile.investment_focus %}
+                                    {{ ", ".join(current_user.investor_profile.investment_focus) }}
+                                {% else %}
+                                    Not specified
+                                {% endif %}
                             </div>
-                            <div class="profile-info-item">
-                                <div class="profile-info-label">Farm Size:</div>
-                                <div class="profile-info-value">{{ current_user.farmer_profile.size }}</div>
-                            </div>
-                        {% elif current_user.user_type == 'investor' and current_user.investor_profile %}
-                            <div class="profile-info-item">
-                                <div class="profile-info-label">Company:</div>
-                                <div class="profile-info-value">{{ current_user.investor_profile.company_name or 'Not specified' }}</div>
-                            </div>
-                            <div class="profile-info-item">
-                                <div class="profile-info-label">Investment Range:</div>
-                                <div class="profile-info-value">
-                                    {% if current_user.investor_profile.min_investment and current_user.investor_profile.max_investment %}
-                                        {{ format_currency(current_user.investor_profile.min_investment) }} - {{ format_currency(current_user.investor_profile.max_investment) }}
-                                    {% else %}
-                                        Not specified
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="profile-info-item">
-                                <div class="profile-info-label">Focus Areas:</div>
-                                <div class="profile-info-value">
-                                    {% if current_user.investor_profile.investment_focus %}
-                                        {{ ", ".join(current_user.investor_profile.investment_focus) }}
-                                    {% else %}
-                                        Not specified
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="alert alert-info">
-                                <p>Your profile is not complete. Please <a href="{{ url_for('profile') }}">complete your profile</a> to get the most out of AgriConnect.</p>
-                            </div>
-                        {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>Your profile is not complete. Please <a href="{{ url_for('profile') }}">complete your profile</a> to get the most out of AgriConnect.</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
