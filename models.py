@@ -1,24 +1,59 @@
-from flask_login import UserMixin
+import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-import time
+from flask_login import UserMixin
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Table
+from sqlalchemy.orm import relationship
+from app import db
 
-# In-memory storage for MVP
-users = []
-projects = []
-investments = []
-messages = []
+# Association tables
+user_connections = db.Table('user_connections',
+    db.Column('requester_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('receiver_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('status', db.String(20), default='pending'),  # pending, accepted, rejected
+    db.Column('created_at', db.DateTime, default=datetime.datetime.utcnow)
+)
 
-class User(UserMixin):
-    """User model for both farmers and investors."""
+class User(UserMixin, db.Model):
+    """User model for farmers, investors, and admins."""
+    __tablename__ = 'users'
     
-    def __init__(self, id, username, email, user_type, password, created_at=None):
-        self.id = id
-        self.username = username
-        self.email = email
-        self.user_type = user_type  # 'farmer' or 'investor'
-        self.password_hash = generate_password_hash(password)
-        self.created_at = created_at or time.time()
-        self.profile = None
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    user_type = db.Column(db.String(20), nullable=False)  # 'farmer', 'investor', or 'admin'
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    last_login = db.Column(db.DateTime)
+    
+    # Relationships
+    farmer_profile = db.relationship('FarmerProfile', backref='user', uselist=False, cascade='all, delete-orphan')
+    investor_profile = db.relationship('InvestorProfile', backref='user', uselist=False, cascade='all, delete-orphan')
+    projects = db.relationship('Project', backref='farmer', lazy='dynamic')
+    investments = db.relationship('Investment', backref='investor', lazy='dynamic')
+    ratings_given = db.relationship('FarmerRating', backref='rater', foreign_keys='FarmerRating.rater_id', lazy='dynamic')
+    ratings_received = db.relationship('FarmerRating', backref='farmer', foreign_keys='FarmerRating.farmer_id', lazy='dynamic')
+    
+    # Connection relationships
+    connections_requested = db.relationship(
+        'User', secondary=user_connections,
+        primaryjoin=(user_connections.c.requester_id == id),
+        secondaryjoin=(user_connections.c.receiver_id == id),
+        backref=db.backref('connection_requests', lazy='dynamic'),
+        lazy='dynamic'
+    )
+    
+    # Messages
+    messages_sent = db.relationship('Message', 
+                                 foreign_keys='Message.sender_id',
+                                 backref='sender', 
+                                 lazy='dynamic')
+    messages_received = db.relationship('Message', 
+                                     foreign_keys='Message.recipient_id',
+                                     backref='recipient', 
+                                     lazy='dynamic')
+    
+    def __repr__(self):
+        return f'<User {self.username}>'
     
     def set_password(self, password):
         """Set password hash for user."""
@@ -28,257 +63,314 @@ class User(UserMixin):
         """Check password against hash."""
         return check_password_hash(self.password_hash, password)
     
-    def save(self):
-        """Save user to in-memory storage."""
-        # Check if user already exists
-        for i, user in enumerate(users):
-            if user.id == self.id:
-                users[i] = self
-                return self
-        # Add new user
-        users.append(self)
-        return self
+    def request_connection(self, user):
+        """Request connection with another user."""
+        if user.id == self.id:
+            return False
+        
+        # Check if connection already exists
+        stmt = user_connections.select().where(
+            ((user_connections.c.requester_id == self.id) & 
+             (user_connections.c.receiver_id == user.id)) |
+            ((user_connections.c.requester_id == user.id) & 
+             (user_connections.c.receiver_id == self.id))
+        )
+        existing = db.session.execute(stmt).first()
+        
+        if existing is None:
+            # Create new connection request
+            db.session.execute(
+                user_connections.insert().values(
+                    requester_id=self.id,
+                    receiver_id=user.id,
+                    status='pending',
+                    created_at=datetime.datetime.utcnow()
+                )
+            )
+            db.session.commit()
+            return True
+        return False
     
-    @classmethod
-    def get_by_id(cls, user_id):
-        """Get user by ID."""
-        for user in users:
-            if user.id == user_id:
-                return user
+    def accept_connection(self, user):
+        """Accept connection request from another user."""
+        # Find pending connection request
+        stmt = user_connections.select().where(
+            (user_connections.c.requester_id == user.id) & 
+            (user_connections.c.receiver_id == self.id) &
+            (user_connections.c.status == 'pending')
+        )
+        existing = db.session.execute(stmt).first()
+        
+        if existing:
+            # Update status to accepted
+            update_stmt = user_connections.update().where(
+                (user_connections.c.requester_id == user.id) & 
+                (user_connections.c.receiver_id == self.id)
+            ).values(status='accepted')
+            db.session.execute(update_stmt)
+            db.session.commit()
+            return True
+        return False
+    
+    def reject_connection(self, user):
+        """Reject connection request from another user."""
+        # Find pending connection request
+        stmt = user_connections.select().where(
+            (user_connections.c.requester_id == user.id) & 
+            (user_connections.c.receiver_id == self.id) &
+            (user_connections.c.status == 'pending')
+        )
+        existing = db.session.execute(stmt).first()
+        
+        if existing:
+            # Update status to rejected
+            update_stmt = user_connections.update().where(
+                (user_connections.c.requester_id == user.id) & 
+                (user_connections.c.receiver_id == self.id)
+            ).values(status='rejected')
+            db.session.execute(update_stmt)
+            db.session.commit()
+            return True
+        return False
+    
+    def get_connection_status(self, user):
+        """Get connection status with another user."""
+        stmt1 = user_connections.select().where(
+            (user_connections.c.requester_id == self.id) & 
+            (user_connections.c.receiver_id == user.id)
+        )
+        conn1 = db.session.execute(stmt1).first()
+        
+        if conn1:
+            return conn1.status
+        
+        stmt2 = user_connections.select().where(
+            (user_connections.c.requester_id == user.id) & 
+            (user_connections.c.receiver_id == self.id)
+        )
+        conn2 = db.session.execute(stmt2).first()
+        
+        if conn2:
+            return conn2.status
+        
         return None
     
-    @classmethod
-    def get_by_email(cls, email):
-        """Get user by email."""
-        for user in users:
-            if user.email == email:
-                return user
-        return None
+    def get_connected_users(self):
+        """Get all users connected to this user."""
+        stmt1 = user_connections.select().where(
+            (user_connections.c.requester_id == self.id) & 
+            (user_connections.c.status == 'accepted')
+        )
+        conn1 = db.session.execute(stmt1).all()
+        
+        stmt2 = user_connections.select().where(
+            (user_connections.c.receiver_id == self.id) & 
+            (user_connections.c.status == 'accepted')
+        )
+        conn2 = db.session.execute(stmt2).all()
+        
+        connected_ids = [c.receiver_id for c in conn1] + [c.requester_id for c in conn2]
+        return User.query.filter(User.id.in_(connected_ids)).all()
     
-    @classmethod
-    def get_by_username(cls, username):
-        """Get user by username."""
-        for user in users:
-            if user.username == username:
-                return user
-        return None
+    def get_pending_connection_requests(self):
+        """Get pending connection requests for this user."""
+        stmt = user_connections.select().where(
+            (user_connections.c.receiver_id == self.id) & 
+            (user_connections.c.status == 'pending')
+        )
+        requests = db.session.execute(stmt).all()
+        requester_ids = [r.requester_id for r in requests]
+        return User.query.filter(User.id.in_(requester_ids)).all()
     
-    @classmethod
-    def get_all_users(cls):
-        """Get all users."""
-        return users
+    def get_avg_rating(self):
+        """Get average rating for a farmer."""
+        if self.user_type != 'farmer':
+            return None
+            
+        ratings = self.ratings_received.all()
+        if not ratings:
+            return 0
+        return sum(r.rating for r in ratings) / len(ratings)
     
-    @classmethod
-    def get_next_id(cls):
-        """Get next available user ID."""
-        return len(users) + 1
+    def is_connected_with(self, user_id):
+        """Check if user is connected with another user."""
+        return any(u.id == user_id for u in self.get_connected_users())
 
 
-class FarmerProfile:
+class FarmerProfile(db.Model):
     """Profile for farmers with farm details."""
+    __tablename__ = 'farmer_profiles'
     
-    def __init__(self, user_id, farm_name, location, size, description, crops=None, technologies=None):
-        self.user_id = user_id
-        self.farm_name = farm_name
-        self.location = location
-        self.size = size
-        self.description = description
-        self.crops = crops or []
-        self.technologies = technologies or []
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
+    farm_name = db.Column(db.String(100), nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    size = db.Column(db.Float, nullable=False)  # in acres
+    description = db.Column(db.Text, nullable=False)
+    crops = db.Column(db.String(200))  # Comma separated list
+    technologies = db.Column(db.String(200))  # Comma separated list
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
-    def save(self):
-        """Save farmer profile."""
-        user = User.get_by_id(self.user_id)
-        if user:
-            user.profile = self
-            return self
-        return None
+    # Farm images
+    images = db.relationship('FarmImage', backref='farmer_profile', lazy='dynamic', cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<FarmerProfile {self.farm_name}>'
+    
+    def get_crops_list(self):
+        """Get list of crops from comma-separated string."""
+        return [crop.strip() for crop in (self.crops or '').split(',')] if self.crops else []
+    
+    def get_technologies_list(self):
+        """Get list of technologies from comma-separated string."""
+        return [tech.strip() for tech in (self.technologies or '').split(',')] if self.technologies else []
 
 
-class InvestorProfile:
+class FarmImage(db.Model):
+    """Images of farms uploaded by farmers."""
+    __tablename__ = 'farm_images'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    profile_id = db.Column(db.Integer, db.ForeignKey('farmer_profiles.id'), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(255))
+    uploaded_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<FarmImage {self.filename}>'
+
+
+class InvestorProfile(db.Model):
     """Profile for investors with investment preferences."""
+    __tablename__ = 'investor_profiles'
     
-    def __init__(self, user_id, company_name=None, investment_focus=None, min_investment=0, 
-                 max_investment=0, preferred_locations=None, interests=None):
-        self.user_id = user_id
-        self.company_name = company_name
-        self.investment_focus = investment_focus
-        self.min_investment = min_investment
-        self.max_investment = max_investment
-        self.preferred_locations = preferred_locations or []
-        self.interests = interests or []
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
+    company_name = db.Column(db.String(100))
+    investment_focus = db.Column(db.String(200))  # Comma separated list
+    min_investment = db.Column(db.Integer, default=0)  # in dollars
+    max_investment = db.Column(db.Integer, default=0)  # in dollars
+    preferred_locations = db.Column(db.String(200))  # Comma separated list
+    interests = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
-    def save(self):
-        """Save investor profile."""
-        user = User.get_by_id(self.user_id)
-        if user:
-            user.profile = self
-            return self
-        return None
+    def __repr__(self):
+        return f'<InvestorProfile {self.company_name or "Unnamed"}>'
+    
+    def get_investment_focus_list(self):
+        """Get list of investment focus areas from comma-separated string."""
+        return [focus.strip() for focus in (self.investment_focus or '').split(',')] if self.investment_focus else []
+    
+    def get_preferred_locations_list(self):
+        """Get list of preferred locations from comma-separated string."""
+        return [loc.strip() for loc in (self.preferred_locations or '').split(',')] if self.preferred_locations else []
 
 
-class Project:
+class Project(db.Model):
     """Project model for farmers seeking investment."""
+    __tablename__ = 'projects'
     
-    def __init__(self, id, farmer_id, title, description, funding_goal, 
-                 duration, location, category, images=None, created_at=None):
-        self.id = id
-        self.farmer_id = farmer_id
-        self.title = title
-        self.description = description
-        self.funding_goal = funding_goal
-        self.duration = duration
-        self.location = location
-        self.category = category
-        self.images = images or []
-        self.created_at = created_at or time.time()
+    id = db.Column(db.Integer, primary_key=True)
+    farmer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    funding_goal = db.Column(db.Integer, nullable=False)  # in dollars
+    duration = db.Column(db.Integer, nullable=False)  # in days
+    location = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    end_date = db.Column(db.DateTime)
     
-    def save(self):
-        """Save project to in-memory storage."""
-        # Check if project already exists
-        for i, project in enumerate(projects):
-            if project.id == self.id:
-                projects[i] = self
-                return self
-        # Add new project
-        projects.append(self)
-        return self
+    # Relationships
+    investments = db.relationship('Investment', backref='project', lazy='dynamic', cascade='all, delete-orphan')
+    images = db.relationship('ProjectImage', backref='project', lazy='dynamic', cascade='all, delete-orphan')
     
-    @classmethod
-    def get_by_id(cls, project_id):
-        """Get project by ID."""
-        for project in projects:
-            if project.id == project_id:
-                return project
-        return None
+    def __repr__(self):
+        return f'<Project {self.title}>'
     
-    @classmethod
-    def get_by_farmer(cls, farmer_id):
-        """Get projects by farmer ID."""
-        return [p for p in projects if p.farmer_id == farmer_id]
+    @property
+    def total_invested(self):
+        """Calculate total amount invested in the project."""
+        return sum(i.amount for i in self.investments.all())
     
-    @classmethod
-    def get_all_projects(cls):
-        """Get all projects."""
-        return projects
+    @property
+    def funding_percentage(self):
+        """Calculate funding percentage."""
+        if self.funding_goal <= 0:
+            return 0
+        return min(100, int((self.total_invested / self.funding_goal) * 100))
     
-    @classmethod
-    def get_next_id(cls):
-        """Get next available project ID."""
-        return len(projects) + 1
+    @property
+    def days_remaining(self):
+        """Calculate days remaining until project end date."""
+        if not self.end_date:
+            return 0
+        delta = self.end_date - datetime.datetime.utcnow()
+        return max(0, delta.days)
 
 
-class Investment:
+class ProjectImage(db.Model):
+    """Images for projects."""
+    __tablename__ = 'project_images'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(255))
+    uploaded_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<ProjectImage {self.filename}>'
+
+
+class Investment(db.Model):
     """Investment model for tracking investments in projects."""
+    __tablename__ = 'investments'
     
-    def __init__(self, id, investor_id, project_id, amount, status='pending', created_at=None):
-        self.id = id
-        self.investor_id = investor_id
-        self.project_id = project_id
-        self.amount = amount
-        self.status = status  # 'pending', 'approved', 'declined'
-        self.created_at = created_at or time.time()
+    id = db.Column(db.Integer, primary_key=True)
+    investor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False)
+    amount = db.Column(db.Integer, nullable=False)  # in dollars
+    status = db.Column(db.String(20), default='pending')  # pending, approved, declined
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    approved_at = db.Column(db.DateTime)
     
-    def save(self):
-        """Save investment to in-memory storage."""
-        # Check if investment already exists
-        for i, investment in enumerate(investments):
-            if investment.id == self.id:
-                investments[i] = self
-                return self
-        # Add new investment
-        investments.append(self)
-        return self
-    
-    @classmethod
-    def get_by_id(cls, investment_id):
-        """Get investment by ID."""
-        for investment in investments:
-            if investment.id == investment_id:
-                return investment
-        return None
-    
-    @classmethod
-    def get_by_investor(cls, investor_id):
-        """Get investments by investor ID."""
-        return [i for i in investments if i.investor_id == investor_id]
-    
-    @classmethod
-    def get_by_project(cls, project_id):
-        """Get investments by project ID."""
-        return [i for i in investments if i.project_id == project_id]
-    
-    @classmethod
-    def get_all_investments(cls):
-        """Get all investments."""
-        return investments
-    
-    @classmethod
-    def get_next_id(cls):
-        """Get next available investment ID."""
-        return len(investments) + 1
+    def __repr__(self):
+        return f'<Investment {self.amount} by {self.investor_id} in {self.project_id}>'
 
 
-class Message:
+class FarmerRating(db.Model):
+    """Ratings given to farmers by investors or admins."""
+    __tablename__ = 'farmer_ratings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    farmer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    rater_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
+    comment = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
+    __table_args__ = (
+        db.UniqueConstraint('farmer_id', 'rater_id', name='unique_farmer_rater'),
+    )
+    
+    def __repr__(self):
+        return f'<FarmerRating {self.rating} for {self.farmer_id} by {self.rater_id}>'
+
+
+class Message(db.Model):
     """Message model for communication between users."""
+    __tablename__ = 'messages'
     
-    def __init__(self, id, sender_id, recipient_id, subject, content, read=False, created_at=None):
-        self.id = id
-        self.sender_id = sender_id
-        self.recipient_id = recipient_id
-        self.subject = subject
-        self.content = content
-        self.read = read
-        self.created_at = created_at or time.time()
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    subject = db.Column(db.String(100))
+    content = db.Column(db.Text, nullable=False)
+    read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     
-    def save(self):
-        """Save message to in-memory storage."""
-        # Check if message already exists
-        for i, message in enumerate(messages):
-            if message.id == self.id:
-                messages[i] = self
-                return self
-        # Add new message
-        messages.append(self)
-        return self
-    
-    @classmethod
-    def get_by_id(cls, message_id):
-        """Get message by ID."""
-        for message in messages:
-            if message.id == message_id:
-                return message
-        return None
-    
-    @classmethod
-    def get_by_sender(cls, sender_id):
-        """Get messages by sender ID."""
-        return [m for m in messages if m.sender_id == sender_id]
-    
-    @classmethod
-    def get_by_recipient(cls, recipient_id):
-        """Get messages by recipient ID."""
-        return [m for m in messages if m.recipient_id == recipient_id]
-    
-    @classmethod
-    def get_conversation(cls, user1_id, user2_id):
-        """Get messages between two users."""
-        return [m for m in messages if 
-                (m.sender_id == user1_id and m.recipient_id == user2_id) or 
-                (m.sender_id == user2_id and m.recipient_id == user1_id)]
-    
-    @classmethod
-    def get_all_messages(cls):
-        """Get all messages."""
-        return messages
-    
-    @classmethod
-    def get_next_id(cls):
-        """Get next available message ID."""
-        return len(messages) + 1
-
-# Add sample data for testing
-def initialize_sample_data():
-    """Initialize sample data for testing."""
-    # Sample users (commented out as per guidelines to not include mock data)
-    pass
+    def __repr__(self):
+        return f'<Message {self.subject or "No subject"} from {self.sender_id} to {self.recipient_id}>'
