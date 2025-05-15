@@ -23,4 +23,6 @@ dependencies = [
     "python-dotenv>=1.1.0",
     "flask-socketio>=5.5.1",
     "numpy>=2.2.5",
+    "eventlet>=0.40.0",
+    "sqlalchemy>=2.0.40",
 ]
