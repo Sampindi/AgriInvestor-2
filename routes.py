@@ -72,8 +72,21 @@ def login():
                     # Try to fetch existing admin
                     admin = User.query.filter_by(email='admin@gmail.com').first()
                     if not admin:
-                        flash('Error creating admin user.', 'danger')
-                        return render_template('login.html', title='Login', app_name=APP_NAME, form=form)
+                        # Create admin in a new transaction
+                        db.session.begin(nested=True)
+                        try:
+                            admin = User(
+                                username='admin',
+                                email='admin@gmail.com',
+                                user_type='admin'
+                            )
+                            admin.set_password('admin123')
+                            db.session.add(admin)
+                            db.session.commit()
+                        except Exception as e:
+                            db.session.rollback()
+                            flash('Error creating admin user.', 'danger')
+                            return render_template('login.html', title='Login', app_name=APP_NAME, form=form)
             
             # Login the admin
             login_user(admin)
