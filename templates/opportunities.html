@@ -131,10 +131,11 @@
                                             {% endif %}
                                         {% endif %}
                                         {% if current_user.profile and current_user.profile.preferred_locations %}
+                                            {% set location_found = false %}
                                             {% for location in current_user.profile.preferred_locations %}
-                                                {% if location.lower() in project.location.lower() %}
+                                                {% if location.lower() in project.location.lower() and not location_found %}
                                                     <li>Located in your preferred region</li>
-                                                    {% break %}
+                                                    {% set location_found = true %}
                                                 {% endif %}
                                             {% endfor %}
                                         {% endif %}
