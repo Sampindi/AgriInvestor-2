@@ -21,6 +21,10 @@ function initializeCharts() {
     Chart.defaults.color = '#94A1B2';
     Chart.defaults.font.family = "'Montserrat', 'Segoe UI', sans-serif";
     
+    // Disable all animations globally
+    Chart.defaults.animation = false;
+    Chart.defaults.animations = false;
+    
     // Initialize various chart types depending on the dashboard
     initializeAdminCharts();
     initializeInvestorCharts();
