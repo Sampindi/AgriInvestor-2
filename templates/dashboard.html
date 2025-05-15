@@ -1,5 +1,70 @@
 {% extends "base.html" %}
 
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+    // Chart data for the various dashboard charts
+    {% if current_user.user_type == 'admin' %}
+        // Admin dashboard data
+        const userGrowthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        const farmerGrowthData = [12, 19, 25, 30, 35, 38];
+        const investorGrowthData = [5, 10, 15, 20, 25, 27];
+        
+        const fundingCategoryLabels = ['Equipment', 'Expansion', 'Technology', 'Infrastructure', 'Organic Transition', 'Startup'];
+        const fundingCategoryData = [30, 25, 15, 10, 10, 10];
+        
+        const projectStatusData = [
+            {{ projects|selectattr('is_funded', 'equalto', false)|selectattr('is_expired', 'equalto', false)|list|length }},
+            {{ projects|selectattr('is_funded', 'equalto', true)|list|length }},
+            {{ projects|selectattr('is_expired', 'equalto', true)|list|length }}
+        ];
+    {% elif current_user.user_type == 'farmer' %}
+        // Farmer dashboard data
+        const projectTitleLabels = [
+            {% for project in projects %}
+                "{{ project.title }}",
+            {% endfor %}
+        ];
+        
+        const currentFundingData = [
+            {% for project in projects %}
+                {{ project.total_invested }},
+            {% endfor %}
+        ];
+        
+        const fundingGoalData = [
+            {% for project in projects %}
+                {{ project.funding_goal }},
+            {% endfor %}
+        ];
+        
+        const investorInterestData = [90, 80, 70, 60, 85, 55];
+    {% elif current_user.user_type == 'investor' %}
+        // Investor dashboard data
+        const investmentProjectLabels = [
+            {% for investment in investments %}
+                "{{ investment.project.title }}",
+            {% endfor %}
+        ];
+        
+        const investmentAmountData = [
+            {% for investment in investments %}
+                {{ investment.amount }},
+            {% endfor %}
+        ];
+        
+        const investmentGoalData = [
+            {% for investment in investments %}
+                {{ investment.project.funding_goal }},
+            {% endfor %}
+        ];
+        
+        const investmentCategoryLabels = ['Equipment', 'Expansion', 'Technology', 'Infrastructure', 'Organic'];
+        const investmentCategoryData = [15, 30, 25, 10, 20];
+    {% endif %}
+</script>
+{% endblock %}
+
 {% block content %}
 <section class="dashboard">
     <div class="container">
@@ -696,9 +761,10 @@
                 </div>
             </div>
 
-            <!-- Stats Cards -->
+            <!-- Stats and Analytics -->
             <div class="col-lg-8">
-                <div class="row">
+                <!-- Stats Cards -->
+                <div class="row mb-4">
                     {% if current_user.user_type == 'farmer' %}
                         <div class="col-md-4">
                             <div class="stats-card">
@@ -727,10 +793,99 @@
                         <div class="col-md-4">
                             <div class="stats-card">
                                 <div class="stats-icon">
-                                    <i class="fas fa-users"></i>
+                                    <i class="fas fa-handshake"></i>
                                 </div>
-                                <div class="stats-number">0</div>
-                                <div class="stats-text">Investor Connections</div>
+                                <div class="stats-number">{{ connected_investors|length }}</div>
+                                <div class="stats-text">Connected Investors</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Farmer Dashboard Charts -->
+                        <div class="col-md-12 mt-4">
+                            <div class="dashboard-card glow-on-hover">
+                                <div class="dashboard-card-title">
+                                    <h3><i class="fas fa-chart-bar me-2"></i> Funding Analytics</h3>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="chart-container">
+                                            <canvas id="fundingProgressChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="summary-card h-100 d-flex flex-column justify-content-center">
+                                            <h4 class="summary-title"><i class="fas fa-seedling me-2"></i> Funding Status</h4>
+                                            <div class="summary-content">
+                                                {% set total_received = 0 %}
+                                                {% for project in projects %}
+                                                    {% set total_received = total_received + project.total_invested %}
+                                                {% endfor %}
+                                                
+                                                <div class="mb-3">
+                                                    <h5>Funding Goals</h5>
+                                                    <p class="h3 text-primary">{{ format_currency(total_funding) }}</p>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <h5>Funding Received</h5>
+                                                    <p class="h3 text-success">{{ format_currency(total_received) }}</p>
+                                                </div>
+                                                
+                                                <div class="progress mt-2" style="height: 10px;">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: {{ (total_received / total_funding * 100) if total_funding > 0 else 0 }}%"
+                                                         aria-valuenow="{{ (total_received / total_funding * 100) if total_funding > 0 else 0 }}" 
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <p class="text-center mt-2">
+                                                    <small>{{ "%.1f"|format((total_received / total_funding * 100) if total_funding > 0 else 0) }}% of goals funded</small>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="chart-container">
+                                            <canvas id="investorInterestChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="dashboard-card-title">
+                                            <h4><i class="fas fa-users me-2"></i> Investor Recommendations</h4>
+                                        </div>
+                                        
+                                        <div class="recommended-investors">
+                                            {% for investor in recommended_investors[:3] %}
+                                                <div class="d-flex align-items-center mb-3 p-2 rounded hover-bg">
+                                                    <div class="user-avatar me-3">
+                                                        <div style="width: 40px; height: 40px; background-color: var(--secondary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-primary); font-size: 16px;">
+                                                            {{ investor.username[0].upper() }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <h5 class="mb-0">{{ investor.username }}</h5>
+                                                        <p class="text-secondary mb-0">
+                                                            {% if investor.investor_profile and investor.investor_profile.investment_focus %}
+                                                                Focus: {{ investor.investor_profile.investment_focus.split(',')[0] }}...
+                                                            {% else %}
+                                                                Investor
+                                                            {% endif %}
+                                                        </p>
+                                                    </div>
+                                                    <a href="#" class="btn-modern btn-sm">Connect</a>
+                                                </div>
+                                            {% else %}
+                                                <div class="text-center text-secondary py-4">
+                                                    <p><i class="fas fa-info-circle me-2"></i> No investor recommendations available yet.</p>
+                                                    <p>Complete your profile and create projects to get matched with investors.</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     {% else %}
@@ -739,7 +894,7 @@
                                 <div class="stats-icon">
                                     <i class="fas fa-search-dollar"></i>
                                 </div>
-                                <div class="stats-number">{{ projects|length }}</div>
+                                <div class="stats-number">{{ recommended_projects|length }}</div>
                                 <div class="stats-text">Matching Projects</div>
                             </div>
                         </div>
@@ -765,6 +920,80 @@
                                     {{ format_currency(total_invested) }}
                                 </div>
                                 <div class="stats-text">Total Invested</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Investor Dashboard Charts -->
+                        <div class="col-md-12 mt-4">
+                            <div class="dashboard-card glow-on-hover">
+                                <div class="dashboard-card-title">
+                                    <h3><i class="fas fa-chart-bar me-2"></i> Investment Analytics</h3>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="chart-container">
+                                            <canvas id="investmentPerformanceChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="chart-container">
+                                            <canvas id="investmentCategoryChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-4">
+                                    <div class="col-md-12">
+                                        <div class="dashboard-card-title">
+                                            <h4><i class="fas fa-lightbulb me-2"></i> Recommended Projects</h4>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            {% for project in recommended_projects[:3] %}
+                                                <div class="col-md-4 mb-3">
+                                                    <div class="project-recommendation-card p-3 rounded">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <div class="project-icon me-2">
+                                                                <div style="width: 40px; height: 40px; background-color: var(--primary-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-primary); font-size: 16px;">
+                                                                    <i class="fas fa-{{ project.category_icon or 'seedling' }}"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <h5 class="mb-0">{{ project.title }}</h5>
+                                                                <small>by {{ project.farmer.username }}</small>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="project-details-mini">
+                                                            <div class="d-flex justify-content-between">
+                                                                <span>Goal:</span>
+                                                                <span>{{ format_currency(project.funding_goal) }}</span>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between">
+                                                                <span>Progress:</span>
+                                                                <span>{{ "%.1f"|format(project.funding_percentage) }}%</span>
+                                                            </div>
+                                                            <div class="progress mt-2 mb-2" style="height: 5px;">
+                                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                                     style="width: {{ project.funding_percentage }}%"
+                                                                     aria-valuenow="{{ project.funding_percentage }}" 
+                                                                     aria-valuemin="0" aria-valuemax="100"></div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn-modern btn-sm w-100">View Project</a>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <div class="col-12 text-center text-secondary py-4">
+                                                    <p><i class="fas fa-info-circle me-2"></i> No recommended projects available yet.</p>
+                                                    <p>Complete your investor profile to get matched with suitable farming projects.</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     {% endif %}
