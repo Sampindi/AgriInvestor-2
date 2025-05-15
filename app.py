@@ -1,6 +1,9 @@
 import os
 import logging
 from dotenv import load_dotenv
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -21,7 +24,7 @@ class Base(DeclarativeBase):
 
 # Initialize extensions
 db = SQLAlchemy(model_class=Base)
-socketio = SocketIO(cors_allowed_origins="*", async_mode=None)
+socketio = SocketIO(cors_allowed_origins="*", async_mode='eventlet')
 
 # Create the Flask app
 app = Flask(__name__)

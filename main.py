@@ -16,11 +16,10 @@ with app.app_context():
     admin = User.query.filter_by(username='admin').first()
     if not admin:
         # Create new admin user
-        admin = User(
-            username='admin',
-            email='admin@farmlink.com',
-            user_type='admin'
-        )
+        admin = User()
+        admin.username = 'admin'
+        admin.email = 'admin@farmlink.com'
+        admin.user_type = 'admin'
         admin.set_password('FarmLink@Admin2025')
         db.session.add(admin)
         db.session.commit()
@@ -40,7 +39,7 @@ from routes import *
 
 # Run the app with socketio
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True, allow_unsafe_werkzeug=True, use_reloader=True, log_output=True)
 else:
     # For Gunicorn compatibility
     from app import app as application

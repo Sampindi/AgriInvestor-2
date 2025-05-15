@@ -1,0 +1,109 @@
+Traceback (most recent call last):
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1536, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_socketio/__init__.py", line 42, in __call__
+    return super().__call__(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/engineio/middleware.py", line 63, in __call__
+    return self.engineio_app.handle_request(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/socketio/server.py", line 434, in handle_request
+    return self.eio.handle_request(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/engineio/server.py", line 286, in handle_request
+    packets = socket.handle_get_request(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/engineio/socket.py", line 99, in handle_get_request
+    packets = self.poll()
+              ^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/engineio/socket.py", line 16, in poll
+    packets = [self.queue.get(
+               ^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/eventlet/queue.py", line 321, in get
+    return waiter.wait()
+           ^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/eventlet/queue.py", line 140, in wait
+    return get_hub().switch()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/eventlet/hubs/hub.py", line 310, in switch
+    return self.greenlet.switch()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/eventlet/hubs/hub.py", line 362, in run
+    self.wait(sleep_time)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/eventlet/hubs/poll.py", line 77, in wait
+    time.sleep(seconds)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/gunicorn/workers/base.py", line 204, in handle_abort
+    sys.exit(1)
+SystemExit: 1
+[2025-05-15 22:32:52 +0000] [3786] [INFO] Worker exiting (pid: 3786)
+[2025-05-15 22:32:53 +0000] [3986] [INFO] Booting worker with pid: 3986
+INFO:app:Using SQLite database
+WARNING:app:SESSION_SECRET not found, using a default key (not secure for production)
+INFO:app:Initializing Flask application with configurations
+INFO:main:Admin user updated - Username: admin, Email: admin@farmlink.com
+INFO:main:Database tables created and admin user configured
+Invalid session bfZTQHzzWE0tnXtSAAAE (further occurrences of this error will be logged with level INFO)
+ERROR:engineio.server:Invalid session bfZTQHzzWE0tnXtSAAAE (further occurrences of this error will be logged with level INFO)
+DEBUG:routes:User admin joined room user_1
+DEBUG:routes:User admin joined room user_1
+[2025-05-15 22:34:42 +0000] [3775] [CRITICAL] WORKER TIMEOUT (pid:3986)
+[2025-05-15 22:34:42 +0000] [3986] [ERROR] Error handling request /socket.io/?EIO=4&transport=polling&t=PRM5NAz&sid=zSthWiwBAxEDw26uAAAD
+Traceback (most recent call last):
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1536, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_socketio/__init__.py", line 42, in __call__
+    return super().__call__(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/engineio/middleware.py", line 63, in __call__
+    return self.engineio_app.handle_request(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/socketio/server.py", line 434, in handle_request
+    return self.eio.handle_request(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/engineio/server.py", line 286, in handle_request
+    packets = socket.handle_get_request(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/engineio/socket.py", line 99, in handle_get_request
+    packets = self.poll()
+              ^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/engineio/socket.py", line 16, in poll
+    packets = [self.queue.get(
+               ^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/eventlet/queue.py", line 321, in get
+    return waiter.wait()
+           ^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/eventlet/queue.py", line 140, in wait
+    return get_hub().switch()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/eventlet/hubs/hub.py", line 310, in switch
+    return self.greenlet.switch()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/eventlet/hubs/hub.py", line 362, in run
+    self.wait(sleep_time)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/eventlet/hubs/poll.py", line 77, in wait
+    time.sleep(seconds)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/gunicorn/workers/base.py", line 204, in handle_abort
+    sys.exit(1)
+SystemExit: 1
+[2025-05-15 22:34:42 +0000] [3986] [INFO] Worker exiting (pid: 3986)
+[2025-05-15 22:34:42 +0000] [3998] [INFO] Booting worker with pid: 3998
+INFO:app:Using SQLite database
+WARNING:app:SESSION_SECRET not found, using a default key (not secure for production)
+INFO:app:Initializing Flask application with configurations
+INFO:main:Admin user updated - Username: admin, Email: admin@farmlink.com
+INFO:main:Database tables created and admin user configured
+Invalid session Gdgd2CPhgf-VD4BqAAAA (further occurrences of this error will be logged with level INFO)
+ERROR:engineio.server:Invalid session Gdgd2CPhgf-VD4BqAAAA (further occurrences of this error will be logged with level INFO)
+DEBUG:routes:User admin joined room user_1
