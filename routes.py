@@ -4,6 +4,7 @@ from flask import render_template, url_for, flash, redirect, request, session, a
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from app import app, db, socketio
+from sqlalchemy import func
 from models import User, FarmerProfile, InvestorProfile, Project, Investment, Message, FarmImage, ProjectImage, FarmerRating
 from forms import (
     LoginForm, RegistrationForm, AdminRegistrationForm, FarmerProfileForm, 
@@ -122,6 +123,65 @@ def admin_register():
     
     return render_template('admin_register.html', title='Admin Registration', app_name=APP_NAME, form=form)
 
+@app.route('/create-admin')
+def create_admin():
+    """Create a default admin user."""
+    # Check if an admin already exists
+    existing_admin = User.query.filter_by(user_type='admin').first()
+    
+    if existing_admin:
+        message = "An admin user already exists. Use the admin registration form to create additional admins."
+        message_category = "warning"
+        return render_template('create_admin.html', 
+                              title='Admin Created', 
+                              app_name=APP_NAME,
+                              message=message,
+                              message_category=message_category,
+                              email=existing_admin.email,
+                              password="[HIDDEN]")
+    
+    try:
+        # Generate a random password
+        import string
+        import random
+        password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+        
+        # Create the admin user
+        admin = User(
+            username="admin",
+            email="admin@agribridge.com",
+            user_type='admin'
+        )
+        admin.set_password(password)
+        
+        db.session.add(admin)
+        db.session.commit()
+        
+        message = "Admin user created successfully!"
+        message_category = "success"
+        
+        return render_template('create_admin.html', 
+                              title='Admin Created', 
+                              app_name=APP_NAME,
+                              message=message,
+                              message_category=message_category,
+                              email=admin.email,
+                              password=password)
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error creating admin: {e}")
+        
+        message = f"An error occurred while creating the admin user: {str(e)}"
+        message_category = "danger"
+        
+        return render_template('create_admin.html', 
+                              title='Admin Creation Failed', 
+                              app_name=APP_NAME,
+                              message=message,
+                              message_category=message_category,
+                              email="N/A",
+                              password="N/A")
+
 @app.route('/logout')
 def logout():
     """User logout route."""
@@ -184,19 +244,42 @@ def dashboard():
                               recommended_projects=recommended_projects)
     
     else:  # admin
-        # Admin dashboard - show stats and management options
-        users = User.query.all()
-        projects = Project.query.all()
-        farmers = User.query.filter_by(user_type='farmer').all()
-        investors = User.query.filter_by(user_type='investor').all()
-        
-        return render_template('dashboard.html', 
-                              title='Admin Dashboard', 
-                              app_name=APP_NAME,
-                              users=users,
-                              projects=projects,
-                              farmers=farmers,
-                              investors=investors)
+        try:
+            # Admin dashboard - show stats and management options
+            users = User.query.all()
+            projects = Project.query.all()
+            farmers = User.query.filter_by(user_type='farmer').all()
+            investors = User.query.filter_by(user_type='investor').all()
+            
+            # Calculate total funding requested across all projects
+            total_funding_requested = db.session.query(func.sum(Project.funding_goal)).scalar() or 0
+            
+            # Calculate total funding received across all investments
+            total_funding_received = db.session.query(func.sum(Investment.amount)).scalar() or 0
+            
+            # Get recent users
+            recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
+            
+            # Get recent projects
+            recent_projects = Project.query.order_by(Project.created_at.desc()).limit(5).all()
+            
+            return render_template('dashboard.html', 
+                                title='Admin Dashboard', 
+                                app_name=APP_NAME,
+                                users=users,
+                                projects=projects,
+                                farmers=farmers,
+                                investors=investors,
+                                total_funding_requested=total_funding_requested,
+                                total_funding_received=total_funding_received,
+                                recent_users=recent_users,
+                                recent_projects=recent_projects)
+        except Exception as e:
+            logger.error(f"Error loading admin dashboard: {e}")
+            flash("An error occurred while loading the admin dashboard. Please try again.", "danger")
+            return render_template('dashboard.html', 
+                                title='Admin Dashboard', 
+                                app_name=APP_NAME)
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required

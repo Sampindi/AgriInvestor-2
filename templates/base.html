@@ -36,7 +36,7 @@
                         {% elif current_user.user_type == 'investor' %}
                             <li><a class="nav-link" href="{{ url_for('opportunities') }}">Opportunities</a></li>
                         {% elif current_user.user_type == 'admin' %}
-                            <li><a class="nav-link" href="{{ url_for('admin') }}">Admin Panel</a></li>
+                            <li><a class="nav-link" href="{{ url_for('dashboard') }}">Admin Panel</a></li>
                         {% endif %}
                         
                         <li>
@@ -136,6 +136,7 @@
                             <li><a href="#">Terms of Service</a></li>
                             <li><a href="#">Cookie Policy</a></li>
                             <li><a href="#">Disclaimers</a></li>
+                            <li><a href="{{ url_for('admin_register') }}">Admin</a></li>
                         </ul>
                     </div>
                 </div>

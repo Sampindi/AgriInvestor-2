@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-shine">
+                <div class="card-body p-4">
+                    <h1 class="text-center mb-4">Create Admin User</h1>
+                    
+                    {% if message %}
+                    <div class="alert alert-{{ message_category }}">
+                        {{ message }}
+                    </div>
+                    {% endif %}
+                    
+                    <p>An admin user has been created with the following credentials:</p>
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="text" class="form-control" value="{{ email }}" readonly>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label class="form-label">Password</label>
+                        <input type="text" class="form-control" value="{{ password }}" readonly>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <a href="{{ url_for('login') }}" class="btn btn-primary">Go to Login</a>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="alert alert-warning">
+                            <strong>Important:</strong> Please save these credentials somewhere secure. This is the only time they will be displayed.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
