@@ -35,33 +35,7 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('That email is already registered. Please use a different one or login.')
 
 
-class AdminRegistrationForm(FlaskForm):
-    """Form for admin registration."""
-    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=20)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=8)])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    admin_key = PasswordField('Admin Key', validators=[DataRequired()])
-    submit = SubmitField('Register as Admin')
-    
-    def validate_username(self, username):
-        """Validate that username is unique."""
-        user = User.query.filter_by(username=username.data).first()
-        if user:
-            raise ValidationError('That username is already taken. Please choose a different one.')
-    
-    def validate_email(self, email):
-        """Validate that email is unique."""
-        user = User.query.filter_by(email=email.data).first()
-        if user:
-            raise ValidationError('That email is already registered. Please use a different one or login.')
-    
-    def validate_admin_key(self, admin_key):
-        """Validate admin key."""
-        # In a real application, this would check against a stored or environment key
-        # For demonstration, we'll use a simple key
-        if admin_key.data != 'aGRbIYB7cV3J9X':
-            raise ValidationError('Invalid admin key.')
+# AdminRegistrationForm removed in favor of hardcoded admin credentials
 
 
 class FarmerProfileForm(FlaskForm):

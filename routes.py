@@ -50,43 +50,11 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
 
-    # Always ensure admin exists
-    admin = User.query.filter_by(email='admin@gmail.com').first()
-    if not admin:
-        try:
-            admin = User(
-                username='admin',
-                email='admin@gmail.com',
-                user_type='admin'
-            )
-            admin.set_password('admin123')
-            db.session.add(admin)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f"Error creating admin user: {e}")
-
     form = LoginForm()
     if form.validate_on_submit():
-        if form.email.data == 'admin@gmail.com' and form.password.data == 'admin123':
-            # Get or create admin
-            admin = User.query.filter_by(email='admin@gmail.com').first()
-            if not admin:
-                try:
-                    admin = User(
-                        username='admin',
-                        email='admin@gmail.com',
-                        user_type='admin'
-                    )
-                    admin.set_password('admin123')
-                    db.session.add(admin)
-                    db.session.commit()
-                except Exception as e:
-                    db.session.rollback()
-                    flash('Error creating admin account.', 'danger')
-                    return redirect(url_for('login'))
-
-            # Login the admin
+        if form.email.data == 'admin@example.com' and form.password.data == 'AdminPass123!':
+            # Hardcoded admin login
+            admin = User.query.filter_by(email='admin@example.com').first()
             if admin:
                 login_user(admin)
                 admin.last_login = datetime.datetime.utcnow()
@@ -138,91 +106,7 @@ def register():
 
     return render_template('register.html', title='Register', app_name=APP_NAME, form=form)
 
-@app.route('/admin-register', methods=['GET', 'POST'])
-def admin_register():
-    """Admin registration route."""
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
-
-    form = AdminRegistrationForm()
-    if form.validate_on_submit():
-        try:
-            admin = User(
-                username=form.username.data,
-                email=form.email.data,
-                user_type='admin'
-            )
-            admin.set_password(form.password.data)
-
-            db.session.add(admin)
-            db.session.commit()
-
-            flash('Admin account created successfully! You can now log in.', 'success')
-            return redirect(url_for('login'))
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f"Error registering admin: {e}")
-            flash('An error occurred during admin registration. Please try again.', 'danger')
-
-    return render_template('admin_register.html', title='Admin Registration', app_name=APP_NAME, form=form)
-
-@app.route('/create-admin')
-def create_admin():
-    """Create a default admin user."""
-    # Check if an admin already exists
-    existing_admin = User.query.filter_by(user_type='admin').first()
-
-    if existing_admin:
-        message = "An admin user already exists. Use the admin registration form to create additional admins."
-        message_category = "warning"
-        return render_template('create_admin.html', 
-                              title='Admin Created', 
-                              app_name=APP_NAME,
-                              message=message,
-                              message_category=message_category,
-                              email=existing_admin.email,
-                              password="[HIDDEN]")
-
-    try:
-        # Use fixed admin credentials
-        password = 'admin123'
-        email = 'admin@gmail.com'
-
-        # Create the admin user
-        admin = User(
-            username="admin",
-            email=email,
-            user_type='admin'
-        )
-        admin.set_password(password)
-
-        db.session.add(admin)
-        db.session.commit()
-
-        message = "Admin user created successfully!"
-        message_category = "success"
-
-        return render_template('create_admin.html', 
-                              title='Admin Created', 
-                              app_name=APP_NAME,
-                              message=message,
-                              message_category=message_category,
-                              email=admin.email,
-                              password=password)
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error creating admin: {e}")
-
-        message = f"An error occurred while creating the admin user: {str(e)}"
-        message_category = "danger"
-
-        return render_template('create_admin.html', 
-                              title='Admin Creation Failed', 
-                              app_name=APP_NAME,
-                              message=message,
-                              message_category=message_category,
-                              email="N/A",
-                              password="N/A")
+# Admin routes removed in favor of hardcoded admin credentials
 
 @app.route('/logout')
 def logout():
