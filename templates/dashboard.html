@@ -9,23 +9,29 @@
                     <h1>
                         {% if current_user.user_type == 'farmer' %}
                             Farmer Dashboard
-                        {% else %}
+                        {% elif current_user.user_type == 'investor' %}
                             Investor Dashboard
+                        {% else %}
+                            Admin Dashboard
                         {% endif %}
                     </h1>
                     <p class="text-secondary">
                         {% if current_user.user_type == 'farmer' %}
                             Manage your agricultural projects and connect with investors
-                        {% else %}
+                        {% elif current_user.user_type == 'investor' %}
                             Discover and track agricultural investment opportunities
+                        {% else %}
+                            Manage platform users, monitor activities, and moderate content
                         {% endif %}
                     </p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     {% if current_user.user_type == 'farmer' %}
                         <a href="{{ url_for('new_project') }}" class="btn btn-primary btn-lg"><i class="fas fa-plus"></i> Create New Project</a>
-                    {% else %}
+                    {% elif current_user.user_type == 'investor' %}
                         <a href="{{ url_for('opportunities') }}" class="btn btn-primary btn-lg"><i class="fas fa-search"></i> Find Opportunities</a>
+                    {% else %}
+                        <a href="#user-management" class="btn btn-primary btn-lg"><i class="fas fa-users"></i> Manage Users</a>
                     {% endif %}
                 </div>
             </div>

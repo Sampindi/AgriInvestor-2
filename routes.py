@@ -6,8 +6,9 @@ from werkzeug.utils import secure_filename
 from app import app, db, socketio
 from models import User, FarmerProfile, InvestorProfile, Project, Investment, Message, FarmImage, ProjectImage, FarmerRating
 from forms import (
-    LoginForm, RegistrationForm, FarmerProfileForm, InvestorProfileForm, 
-    ProjectForm, InvestmentForm, ContactForm, MessageForm, SearchForm
+    LoginForm, RegistrationForm, AdminRegistrationForm, FarmerProfileForm, 
+    InvestorProfileForm, ProjectForm, InvestmentForm, ContactForm, MessageForm, 
+    SearchForm
 )
 from utils import parse_comma_separated, format_currency, format_date
 from recommendation_engine import RecommendationEngine
@@ -73,20 +74,53 @@ def register():
     
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(
-            username=form.username.data,
-            email=form.email.data,
-            user_type=form.user_type.data
-        )
-        user.set_password(form.password.data)
-        
-        db.session.add(user)
-        db.session.commit()
-        
-        flash(f'Account created successfully! You can now log in.', 'success')
-        return redirect(url_for('login'))
+        try:
+            user = User(
+                username=form.username.data,
+                email=form.email.data,
+                user_type=form.user_type.data
+            )
+            user.set_password(form.password.data)
+            
+            db.session.add(user)
+            db.session.commit()
+            
+            flash(f'Account created successfully! You can now log in.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error registering user: {e}")
+            flash('An error occurred during registration. Please try again.', 'danger')
     
     return render_template('register.html', title='Register', app_name=APP_NAME, form=form)
+
+@app.route('/admin-register', methods=['GET', 'POST'])
+def admin_register():
+    """Admin registration route."""
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
+    form = AdminRegistrationForm()
+    if form.validate_on_submit():
+        try:
+            admin = User(
+                username=form.username.data,
+                email=form.email.data,
+                user_type='admin'
+            )
+            admin.set_password(form.password.data)
+            
+            db.session.add(admin)
+            db.session.commit()
+            
+            flash('Admin account created successfully! You can now log in.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error registering admin: {e}")
+            flash('An error occurred during admin registration. Please try again.', 'danger')
+    
+    return render_template('admin_register.html', title='Admin Registration', app_name=APP_NAME, form=form)
 
 @app.route('/logout')
 def logout():

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card bg-shine">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <h1 class="mb-3">Admin Registration</h1>
+                            <p class="text-secondary">Create an admin account for AgriBridge</p>
+                        </div>
+                        
+                        <form method="POST" action="" class="fade-in">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="form-group mb-4">
+                                {{ form.username.label(class="form-label") }}
+                                {% if form.username.errors %}
+                                    {{ form.username(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.username.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.username(class="form-control", placeholder="Choose a username") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.email.label(class="form-label") }}
+                                {% if form.email.errors %}
+                                    {{ form.email(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.email(class="form-control", placeholder="Your email address") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.password.label(class="form-label") }}
+                                {% if form.password.errors %}
+                                    {{ form.password(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.password.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.password(class="form-control", placeholder="Create a secure password") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.confirm_password.label(class="form-label") }}
+                                {% if form.confirm_password.errors %}
+                                    {{ form.confirm_password(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.confirm_password.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.confirm_password(class="form-control", placeholder="Confirm your password") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.admin_key.label(class="form-label") }}
+                                {% if form.admin_key.errors %}
+                                    {{ form.admin_key(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.admin_key.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.admin_key(class="form-control", placeholder="Enter the admin key") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                {{ form.submit(class="btn btn-primary w-100 btn-lg") }}
+                            </div>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <p>Already have an account? <a href="{{ url_for('login') }}" class="hover-underline">Log In</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="feature-card bg-shine h-100 d-flex flex-column justify-content-center p-5">
+                    <div class="feature-icon mb-4">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Admin Responsibilities</h3>
+                    <ul class="mt-4">
+                        <li class="mb-3">Manage user accounts and permissions</li>
+                        <li class="mb-3">Review and approve projects</li>
+                        <li class="mb-3">Monitor platform activity and statistics</li>
+                        <li class="mb-3">Ensure platform security and compliance</li>
+                        <li class="mb-3">Support users and resolve issues</li>
+                    </ul>
+                    <div class="mt-auto">
+                        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="AgriBridge Logo" class="img-fluid" style="max-width: 200px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
