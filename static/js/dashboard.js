@@ -48,17 +48,19 @@ function initializeAdminCharts() {
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: userGrowthLabels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                labels: userGrowthLabels || Array(12).fill(0).map((_, i) => {
+                    return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i];
+                }),
                 datasets: [{
                     label: 'Farmers',
-                    data: farmerGrowthData || [12, 19, 25, 30, 35, 38],
+                    data: farmerGrowthData || Array(12).fill(0),
                     borderColor: '#2CB67D',
                     backgroundColor: 'rgba(44, 182, 125, 0.2)',
                     tension: 0.4,
                     fill: true
                 }, {
                     label: 'Investors',
-                    data: investorGrowthData || [5, 10, 15, 20, 25, 27],
+                    data: investorGrowthData || Array(12).fill(0),
                     borderColor: '#7F5AF0',
                     backgroundColor: 'rgba(127, 90, 240, 0.2)',
                     tension: 0.4,
@@ -116,20 +118,40 @@ function initializeAdminCharts() {
     const fundingDistCanvas = document.getElementById('fundingDistributionChart');
     if (fundingDistCanvas) {
         const ctx = fundingDistCanvas.getContext('2d');
+        // Prepare default values
+        const defaultLabels = ['Equipment', 'Expansion', 'Technology', 'Infrastructure', 'Organic Transition', 'Startup'];
+        const defaultData = Array(defaultLabels.length).fill(0);
+        
+        // Use provided data or defaults
+        const chartLabels = fundingCategoryLabels && fundingCategoryLabels.length > 0 ? fundingCategoryLabels : defaultLabels;
+        const chartData = fundingCategoryData && fundingCategoryData.length > 0 ? fundingCategoryData : defaultData;
+        
+        // Ensure we have enough colors for all categories
+        const generateColors = (count) => {
+            const colors = [
+                '#2CB67D', // Primary
+                '#7F5AF0', // Secondary
+                '#FF8906', // Accent
+                '#4EA8DE', // Info
+                '#F9C846', // Warning
+                '#E53170'  // Danger
+            ];
+            
+            // If we need more colors than we have, generate them
+            while (colors.length < count) {
+                colors.push(`hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`);
+            }
+            
+            return colors.slice(0, count);
+        };
+        
         new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: fundingCategoryLabels || ['Equipment', 'Expansion', 'Technology', 'Infrastructure', 'Organic Transition', 'Startup'],
+                labels: chartLabels,
                 datasets: [{
-                    data: fundingCategoryData || [30, 25, 15, 10, 10, 10],
-                    backgroundColor: [
-                        '#2CB67D', // Primary
-                        '#7F5AF0', // Secondary
-                        '#FF8906', // Accent
-                        '#4EA8DE', // Info
-                        '#F9C846', // Warning
-                        '#E53170'  // Danger
-                    ],
+                    data: chartData,
+                    backgroundColor: generateColors(chartLabels.length),
                     borderColor: 'rgba(22, 22, 26, 0.8)',
                     borderWidth: 3,
                     hoverOffset: 15

@@ -188,6 +188,55 @@ def dashboard():
 
             # Get recent projects
             recent_projects = Project.query.order_by(Project.created_at.desc()).limit(5).all()
+            
+            # Get user growth data (monthly counts of new users)
+            current_year = datetime.datetime.utcnow().year
+            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            farmer_growth_data = []
+            investor_growth_data = []
+            
+            for month_idx in range(12):
+                # Get farmer count for month
+                start_date = datetime.datetime(current_year, month_idx + 1, 1)
+                if month_idx < 11:
+                    end_date = datetime.datetime(current_year, month_idx + 2, 1)
+                else:
+                    end_date = datetime.datetime(current_year + 1, 1, 1)
+                
+                farmer_count = User.query.filter_by(user_type='farmer') \
+                    .filter(User.created_at >= start_date) \
+                    .filter(User.created_at < end_date) \
+                    .count() or 0
+                farmer_growth_data.append(farmer_count)
+                
+                investor_count = User.query.filter_by(user_type='investor') \
+                    .filter(User.created_at >= start_date) \
+                    .filter(User.created_at < end_date) \
+                    .count() or 0
+                investor_growth_data.append(investor_count)
+            
+            # Get funding distribution by category
+            category_counts = {}
+            for project in projects:
+                if project.category in category_counts:
+                    category_counts[project.category] += project.funding_goal
+                else:
+                    category_counts[project.category] = project.funding_goal
+            
+            # Calculate percentages
+            total_funding_goal = sum(category_counts.values()) or 1  # Avoid division by zero
+            funding_category_data = []
+            funding_category_labels = []
+            
+            for category, amount in category_counts.items():
+                funding_category_labels.append(category)
+                percentage = int((amount / total_funding_goal) * 100)
+                funding_category_data.append(percentage)
+                
+            # If no data, provide empty arrays
+            if not funding_category_labels:
+                funding_category_labels = ['Equipment', 'Expansion', 'Technology', 'Infrastructure', 'Organic Transition', 'Startup']
+                funding_category_data = [0, 0, 0, 0, 0, 0]
 
             return render_template('dashboard.html', 
                                 title='Admin Dashboard', 
@@ -199,7 +248,12 @@ def dashboard():
                                 total_funding_requested=total_funding_requested,
                                 total_funding_received=total_funding_received,
                                 recent_users=recent_users,
-                                recent_projects=recent_projects)
+                                recent_projects=recent_projects,
+                                months=months,
+                                farmer_growth_data=farmer_growth_data,
+                                investor_growth_data=investor_growth_data,
+                                funding_category_labels=funding_category_labels,
+                                funding_category_data=funding_category_data)
         except Exception as e:
             logger.error(f"Error loading admin dashboard: {e}")
             flash("An error occurred while loading the admin dashboard. Please try again.", "danger")

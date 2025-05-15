@@ -6,17 +6,40 @@
     // Chart data for the various dashboard charts
     {% if current_user.user_type == 'admin' %}
         // Admin dashboard data
-        const userGrowthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-        const farmerGrowthData = [12, 19, 25, 30, 35, 38];
-        const investorGrowthData = [5, 10, 15, 20, 25, 27];
+        const userGrowthLabels = [
+            {% for month in months %}
+                "{{ month }}",
+            {% endfor %}
+        ];
         
-        const fundingCategoryLabels = ['Equipment', 'Expansion', 'Technology', 'Infrastructure', 'Organic Transition', 'Startup'];
-        const fundingCategoryData = [30, 25, 15, 10, 10, 10];
+        const farmerGrowthData = [
+            {% for count in farmer_growth_data %}
+                {{ count }},
+            {% endfor %}
+        ];
+        
+        const investorGrowthData = [
+            {% for count in investor_growth_data %}
+                {{ count }},
+            {% endfor %}
+        ];
+        
+        const fundingCategoryLabels = [
+            {% for label in funding_category_labels %}
+                "{{ label }}",
+            {% endfor %}
+        ];
+        
+        const fundingCategoryData = [
+            {% for data in funding_category_data %}
+                {{ data }},
+            {% endfor %}
+        ];
         
         const projectStatusData = [
-            {{ projects|selectattr('is_funded', 'equalto', false)|selectattr('is_expired', 'equalto', false)|list|length }},
-            {{ projects|selectattr('is_funded', 'equalto', true)|list|length }},
-            {{ projects|selectattr('is_expired', 'equalto', true)|list|length }}
+            {{ projects|selectattr('funding_percentage', 'lt', 100)|selectattr('days_remaining', 'gt', 0)|list|length or 0 }},
+            {{ projects|selectattr('funding_percentage', 'eq', 100)|list|length or 0 }},
+            {{ projects|selectattr('days_remaining', 'le', 0)|list|length or 0 }}
         ];
     {% elif current_user.user_type == 'farmer' %}
         // Farmer dashboard data
