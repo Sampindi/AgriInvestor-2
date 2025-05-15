@@ -1,8 +1,8 @@
 import os
 import logging
 from dotenv import load_dotenv
-import eventlet
-eventlet.monkey_patch()
+# Important: We're going to use threading mode instead of eventlet to avoid socket issues
+# with Gunicorn
 
 from flask import Flask
 from flask_login import LoginManager
@@ -24,7 +24,8 @@ class Base(DeclarativeBase):
 
 # Initialize extensions
 db = SQLAlchemy(model_class=Base)
-socketio = SocketIO(cors_allowed_origins="*", async_mode='eventlet')
+# Using threading mode for better Gunicorn compatibility
+socketio = SocketIO(cors_allowed_origins="*", async_mode='threading')
 
 # Create the Flask app
 app = Flask(__name__)
