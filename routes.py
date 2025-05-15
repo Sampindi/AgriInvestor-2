@@ -865,8 +865,6 @@ def chat(user_id):
 # Import Flask-SocketIO functions
 from flask_socketio import emit, join_room
 # WebSocket setup for chat
-@flask_socketio import emit, join_room
-# WebSocket setup for chat
 @socketio.on('send_message')
 def handle_message(data):
     """Handle chat messages through WebSocket."""
