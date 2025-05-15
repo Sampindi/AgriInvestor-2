@@ -374,3 +374,51 @@ class Message(db.Model):
     
     def __repr__(self):
         return f'<Message {self.subject or "No subject"} from {self.sender_id} to {self.recipient_id}>'
+
+
+class Activity(db.Model):
+    """Activity model for tracking system activities for admin dashboard."""
+    __tablename__ = 'activities'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    activity_type = db.Column(db.String(50), nullable=False)  # user_registration, new_project, investment, etc.
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    related_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+    investment_id = db.Column(db.Integer, db.ForeignKey('investments.id'))
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    icon = db.Column(db.String(50), default='fa-info-circle')  # Font Awesome icon class
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id])
+    related_user = db.relationship('User', foreign_keys=[related_user_id])
+    project = db.relationship('Project', foreign_keys=[project_id])
+    investment = db.relationship('Investment', foreign_keys=[investment_id])
+    
+    def __repr__(self):
+        return f'<Activity {self.activity_type} by {self.user_id} at {self.created_at}>'
+    
+    @property
+    def time_ago(self):
+        """Return a human-readable string representing how long ago this activity occurred."""
+        now = datetime.datetime.utcnow()
+        diff = now - self.created_at
+        
+        if diff.days > 365:
+            years = diff.days // 365
+            return f"{years} year{'s' if years != 1 else ''} ago"
+        elif diff.days > 30:
+            months = diff.days // 30
+            return f"{months} month{'s' if months != 1 else ''} ago"
+        elif diff.days > 0:
+            return f"{diff.days} day{'s' if diff.days != 1 else ''} ago"
+        elif diff.seconds > 3600:
+            hours = diff.seconds // 3600
+            return f"{hours} hour{'s' if hours != 1 else ''} ago"
+        elif diff.seconds > 60:
+            minutes = diff.seconds // 60
+            return f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+        else:
+            return "Just now"

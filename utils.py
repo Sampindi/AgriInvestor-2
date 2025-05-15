@@ -50,3 +50,63 @@ def truncate_text(text, max_length=100):
     if not text or len(text) <= max_length:
         return text
     return text[:max_length] + '...'
+
+
+def record_activity(db, socketio, activity_type, title, description, user_id=None, related_user_id=None, 
+                   project_id=None, investment_id=None, icon=None):
+    """
+    Record a system activity and emit it to admin users via SocketIO.
+    
+    Parameters:
+    - db: SQLAlchemy database instance
+    - socketio: Flask-SocketIO instance
+    - activity_type: Type of activity (e.g., 'user_registration', 'new_project', 'investment')
+    - title: Title for the activity
+    - description: Description of the activity
+    - user_id: ID of the primary user involved (optional)
+    - related_user_id: ID of a secondary user involved (optional)
+    - project_id: ID of related project (optional)
+    - investment_id: ID of related investment (optional)
+    - icon: Font Awesome icon class (optional)
+    """
+    from models import Activity
+    
+    # Set default icon based on activity type if not provided
+    if not icon:
+        icon_map = {
+            'user_registration': 'fa-user-plus',
+            'new_project': 'fa-project-diagram',
+            'investment': 'fa-dollar-sign',
+            'profile_update': 'fa-user-edit',
+            'message': 'fa-envelope',
+            'connection': 'fa-handshake',
+            'rating': 'fa-star'
+        }
+        icon = icon_map.get(activity_type, 'fa-info-circle')
+    
+    # Create and save the activity
+    activity = Activity(
+        activity_type=activity_type,
+        user_id=user_id,
+        related_user_id=related_user_id,
+        project_id=project_id,
+        investment_id=investment_id,
+        title=title,
+        description=description,
+        icon=icon
+    )
+    
+    db.session.add(activity)
+    db.session.commit()
+    
+    # Emit to the admin room for real-time updates
+    socketio.emit('new_activity', {
+        'id': activity.id,
+        'activity_type': activity.activity_type,
+        'user_id': activity.user_id,
+        'title': activity.title,
+        'description': activity.description,
+        'icon': activity.icon,
+        'created_at': activity.created_at.isoformat(),
+        'time_ago': activity.time_ago
+    }, room='admin_room')
