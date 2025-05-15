@@ -390,6 +390,45 @@
     font-size: 0.9rem;
 }
 
+/* Highlight effect for new activities */
+.activity-item.highlight {
+    animation: activity-highlight 2s ease-out;
+}
+
+@keyframes activity-highlight {
+    0% {
+        background-color: rgba(127, 90, 240, 0.2);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Empty state for activity feed */
+#no-activities-message {
+    color: var(--text-secondary);
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+}
+
+/* Small modern button for activity controls */
+.btn-modern.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    background-color: rgba(127, 90, 240, 0.2);
+    color: var(--text-primary);
+    border: 1px solid rgba(127, 90, 240, 0.3);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-modern.btn-sm:hover {
+    background-color: rgba(127, 90, 240, 0.4);
+    border-color: rgba(127, 90, 240, 0.5);
+}
+
 /* Static Glow Effect */
 .glow-on-hover {
     position: relative;
