@@ -1,16 +1,16 @@
-// Main JavaScript file for AgriConnect
+// Main JavaScript file for AgriBridge
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Mobile navigation toggle
-    const navbarToggler = document.querySelector('.navbar-toggler');
-    const navbarNav = document.querySelector('.navbar-nav');
+    // Add active class to current page nav link
+    const currentLocation = window.location.pathname;
+    const navLinks = document.querySelectorAll('.navbar-nav-horizontal .nav-link');
     
-    if (navbarToggler && navbarNav) {
-        navbarToggler.addEventListener('click', function() {
-            navbarNav.classList.toggle('show');
-        });
-    }
+    navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentLocation) {
+            link.classList.add('active');
+        }
+    })
     
     // Project image gallery (for project detail page)
     const mainImage = document.querySelector('.project-main-image');
