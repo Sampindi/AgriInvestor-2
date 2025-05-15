@@ -29,7 +29,7 @@ def index():
     except Exception as e:
         logger.error(f"Error retrieving projects: {e}")
         featured_projects = []
-        
+
     return render_template('index.html', 
                           title='Home', 
                           app_name=APP_NAME,
@@ -49,15 +49,14 @@ def login():
     """User login route."""
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    
+
     form = LoginForm()
     if form.validate_on_submit():
         # First check if admin needs to be created
         if form.email.data == 'admin@gmail.com' and form.password.data == 'admin123':
-            # Check if admin exists
+            # Create admin user if doesn't exist
             admin = User.query.filter_by(email='admin@gmail.com').first()
             if not admin:
-                # Create admin user if doesn't exist
                 try:
                     admin = User(
                         username='admin',
@@ -69,46 +68,30 @@ def login():
                     db.session.commit()
                 except Exception as e:
                     db.session.rollback()
-                    # Try to fetch existing admin
-                    admin = User.query.filter_by(email='admin@gmail.com').first()
-                    if not admin:
-                        # Create admin in a new transaction
-                        db.session.begin(nested=True)
-                        try:
-                            admin = User(
-                                username='admin',
-                                email='admin@gmail.com',
-                                user_type='admin'
-                            )
-                            admin.set_password('admin123')
-                            db.session.add(admin)
-                            db.session.commit()
-                        except Exception as e:
-                            db.session.rollback()
-                            flash('Error creating admin user.', 'danger')
-                            return render_template('login.html', title='Login', app_name=APP_NAME, form=form)
-            
+                    flash('Error creating admin user.', 'danger')
+                    return render_template('login.html', title='Login', app_name=APP_NAME, form=form)
+
             # Login the admin
             login_user(admin)
             admin.last_login = datetime.datetime.utcnow()
             db.session.commit()
             flash('Admin login successful!', 'success')
             return redirect(url_for('dashboard'))
-        
+
         # Regular user login
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
             # Update last login time
             user.last_login = datetime.datetime.utcnow()
             db.session.commit()
-            
+
             login_user(user)
             flash('Login successful!', 'success')
             next_page = request.args.get('next')
             return redirect(next_page or url_for('dashboard'))
         else:
             flash('Login unsuccessful. Please check email and password.', 'danger')
-    
+
     return render_template('login.html', title='Login', app_name=APP_NAME, form=form)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -116,7 +99,7 @@ def register():
     """User registration route."""
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    
+
     form = RegistrationForm()
     if form.validate_on_submit():
         try:
@@ -126,17 +109,17 @@ def register():
                 user_type=form.user_type.data
             )
             user.set_password(form.password.data)
-            
+
             db.session.add(user)
             db.session.commit()
-            
+
             flash(f'Account created successfully! You can now log in.', 'success')
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
             logger.error(f"Error registering user: {e}")
             flash('An error occurred during registration. Please try again.', 'danger')
-    
+
     return render_template('register.html', title='Register', app_name=APP_NAME, form=form)
 
 @app.route('/admin-register', methods=['GET', 'POST'])
@@ -144,7 +127,7 @@ def admin_register():
     """Admin registration route."""
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    
+
     form = AdminRegistrationForm()
     if form.validate_on_submit():
         try:
@@ -154,17 +137,17 @@ def admin_register():
                 user_type='admin'
             )
             admin.set_password(form.password.data)
-            
+
             db.session.add(admin)
             db.session.commit()
-            
+
             flash('Admin account created successfully! You can now log in.', 'success')
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
             logger.error(f"Error registering admin: {e}")
             flash('An error occurred during admin registration. Please try again.', 'danger')
-    
+
     return render_template('admin_register.html', title='Admin Registration', app_name=APP_NAME, form=form)
 
 @app.route('/create-admin')
@@ -172,7 +155,7 @@ def create_admin():
     """Create a default admin user."""
     # Check if an admin already exists
     existing_admin = User.query.filter_by(user_type='admin').first()
-    
+
     if existing_admin:
         message = "An admin user already exists. Use the admin registration form to create additional admins."
         message_category = "warning"
@@ -183,12 +166,12 @@ def create_admin():
                               message_category=message_category,
                               email=existing_admin.email,
                               password="[HIDDEN]")
-    
+
     try:
         # Use fixed admin credentials
         password = 'admin123'
         email = 'admin@gmail.com'
-        
+
         # Create the admin user
         admin = User(
             username="admin",
@@ -196,13 +179,13 @@ def create_admin():
             user_type='admin'
         )
         admin.set_password(password)
-        
+
         db.session.add(admin)
         db.session.commit()
-        
+
         message = "Admin user created successfully!"
         message_category = "success"
-        
+
         return render_template('create_admin.html', 
                               title='Admin Created', 
                               app_name=APP_NAME,
@@ -213,10 +196,10 @@ def create_admin():
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error creating admin: {e}")
-        
+
         message = f"An error occurred while creating the admin user: {str(e)}"
         message_category = "danger"
-        
+
         return render_template('create_admin.html', 
                               title='Admin Creation Failed', 
                               app_name=APP_NAME,
@@ -239,25 +222,25 @@ def dashboard():
     if current_user.user_type == 'farmer':
         # Get farmer's projects
         projects = current_user.projects.all()
-        
+
         # Get connection requests
         connection_requests = current_user.get_pending_connection_requests()
-        
+
         # Get connected investors
         connected_users = current_user.get_connected_users()
         connected_investors = [u for u in connected_users if u.user_type == 'investor']
-        
+
         # Get similar farms using the recommendation engine
         similar_farms = []
         if current_user.farmer_profile:
             similar_farms = RecommendationEngine.get_similar_farms(current_user.id)
-        
+
         # Get credibility score
         credibility_score = RecommendationEngine.get_farmer_credibility_score(current_user.id)
-        
+
         # Get recommended investors
         recommended_investors = RecommendationEngine.recommend_investors_to_farmer(current_user.id)
-        
+
         return render_template('dashboard.html', 
                               title='Farmer Dashboard', 
                               app_name=APP_NAME,
@@ -267,25 +250,25 @@ def dashboard():
                               similar_farms=similar_farms,
                               credibility_score=credibility_score,
                               recommended_investors=recommended_investors)
-    
+
     elif current_user.user_type == 'investor':
         # Get investor's investments
         investments = current_user.investments.all()
-        
+
         # Get connected farmers
         connected_users = current_user.get_connected_users()
         connected_farmers = [u for u in connected_users if u.user_type == 'farmer']
-        
+
         # Get recommended projects using the recommendation engine
         recommended_projects = RecommendationEngine.recommend_projects_to_investor(current_user.id)
-        
+
         return render_template('dashboard.html', 
                               title='Investor Dashboard', 
                               app_name=APP_NAME,
                               investments=investments,
                               connected_farmers=connected_farmers,
                               recommended_projects=recommended_projects)
-    
+
     else:  # admin
         try:
             # Admin dashboard - show stats and management options
@@ -293,19 +276,19 @@ def dashboard():
             projects = Project.query.all()
             farmers = User.query.filter_by(user_type='farmer').all()
             investors = User.query.filter_by(user_type='investor').all()
-            
+
             # Calculate total funding requested across all projects
             total_funding_requested = db.session.query(func.sum(Project.funding_goal)).scalar() or 0
-            
+
             # Calculate total funding received across all investments
             total_funding_received = db.session.query(func.sum(Investment.amount)).scalar() or 0
-            
+
             # Get recent users
             recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
-            
+
             # Get recent projects
             recent_projects = Project.query.order_by(Project.created_at.desc()).limit(5).all()
-            
+
             return render_template('dashboard.html', 
                                 title='Admin Dashboard', 
                                 app_name=APP_NAME,
@@ -330,7 +313,7 @@ def profile():
     """User profile route."""
     if current_user.user_type == 'farmer':
         form = FarmerProfileForm()
-        
+
         if form.validate_on_submit():
             # Check if profile already exists
             if current_user.farmer_profile:
@@ -353,11 +336,11 @@ def profile():
                     technologies=form.technologies.data
                 )
                 db.session.add(profile)
-            
+
             db.session.commit()
             flash('Your farmer profile has been updated!', 'success')
             return redirect(url_for('dashboard'))
-        
+
         # Pre-fill form if profile exists
         elif request.method == 'GET' and current_user.farmer_profile:
             profile = current_user.farmer_profile
@@ -367,16 +350,16 @@ def profile():
             form.description.data = profile.description
             form.crops.data = profile.crops
             form.technologies.data = profile.technologies
-        
+
         # Get farm images if they exist
         farm_images = []
         if current_user.farmer_profile:
             farm_images = current_user.farmer_profile.images.all()
-        
+
         # Get farmer ratings
         ratings = current_user.ratings_received.all()
         avg_rating = current_user.get_avg_rating()
-        
+
         return render_template('farmer_profile.html', 
                               title='Farmer Profile', 
                               app_name=APP_NAME,
@@ -384,14 +367,14 @@ def profile():
                               farm_images=farm_images,
                               ratings=ratings,
                               avg_rating=avg_rating)
-    
+
     else:  # investor
         form = InvestorProfileForm()
-        
+
         if form.validate_on_submit():
             # Convert form.investment_focus from list to comma-separated string
             investment_focus = ','.join(form.investment_focus.data) if form.investment_focus.data else ''
-            
+
             # Check if profile already exists
             if current_user.investor_profile:
                 profile = current_user.investor_profile
@@ -413,25 +396,25 @@ def profile():
                     interests=form.interests.data
                 )
                 db.session.add(profile)
-            
+
             db.session.commit()
             flash('Your investor profile has been updated!', 'success')
             return redirect(url_for('dashboard'))
-        
+
         # Pre-fill form if profile exists
         elif request.method == 'GET' and current_user.investor_profile:
             profile = current_user.investor_profile
             form.company_name.data = profile.company_name
-            
+
             # Convert comma-separated string to list for investment_focus
             if profile.investment_focus:
                 form.investment_focus.data = profile.investment_focus.split(',')
-            
+
             form.min_investment.data = profile.min_investment
             form.max_investment.data = profile.max_investment
             form.preferred_locations.data = profile.preferred_locations
             form.interests.data = profile.interests
-        
+
         return render_template('investor_profile.html', 
                               title='Investor Profile', 
                               app_name=APP_NAME,
@@ -444,44 +427,44 @@ def upload_farm_image():
     if current_user.user_type != 'farmer':
         flash('Only farmers can upload farm images.', 'danger')
         return redirect(url_for('profile'))
-    
+
     if not current_user.farmer_profile:
         flash('Please create your farmer profile first.', 'warning')
         return redirect(url_for('profile'))
-    
+
     # Check if the post request has the file part
     if 'farm_image' not in request.files:
         flash('No file part', 'danger')
         return redirect(url_for('profile'))
-    
+
     file = request.files['farm_image']
     if file.filename == '':
         flash('No selected file', 'danger')
         return redirect(url_for('profile'))
-    
+
     if file:
         # Secure the filename and save the file
         filename = secure_filename(file.filename)
         # Add timestamp to filename to avoid duplicates
         timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         unique_filename = f"{timestamp}_{filename}"
-        
+
         # Save the file
         file_path = os.path.join(app.static_folder, 'uploads', 'farm_images', unique_filename)
         file.save(file_path)
-        
+
         # Create farm image record
         image = FarmImage(
             profile_id=current_user.farmer_profile.id,
             filename=unique_filename,
             description=request.form.get('description', '')
         )
-        
+
         db.session.add(image)
         db.session.commit()
-        
+
         flash('Farm image uploaded successfully!', 'success')
-    
+
     return redirect(url_for('profile'))
 
 @app.route('/delete_farm_image/<int:image_id>', methods=['POST'])
@@ -491,23 +474,23 @@ def delete_farm_image(image_id):
     if current_user.user_type != 'farmer':
         flash('Only farmers can delete farm images.', 'danger')
         return redirect(url_for('profile'))
-    
+
     image = FarmImage.query.get_or_404(image_id)
-    
+
     # Ensure the image belongs to the current user
     if image.farmer_profile.user_id != current_user.id:
         flash('You do not have permission to delete this image.', 'danger')
         return redirect(url_for('profile'))
-    
+
     # Delete the file from the filesystem
     file_path = os.path.join(app.static_folder, 'uploads', 'farm_images', image.filename)
     if os.path.exists(file_path):
         os.remove(file_path)
-    
+
     # Delete the record from the database
     db.session.delete(image)
     db.session.commit()
-    
+
     flash('Farm image deleted successfully!', 'success')
     return redirect(url_for('profile'))
 
@@ -518,26 +501,26 @@ def rate_farmer(farmer_id):
     if current_user.user_type not in ['investor', 'admin']:
         flash('Only investors and admins can rate farmers.', 'danger')
         return redirect(url_for('index'))
-    
+
     farmer = User.query.get_or_404(farmer_id)
     if farmer.user_type != 'farmer':
         flash('You can only rate farmers.', 'danger')
         return redirect(url_for('index'))
-    
+
     # Get rating from form
     rating = request.form.get('rating', type=int)
     comment = request.form.get('comment', '')
-    
+
     if not rating or rating < 1 or rating > 5:
         flash('Please provide a valid rating (1-5).', 'danger')
         return redirect(url_for('index'))
-    
+
     # Check if user has already rated this farmer
     existing_rating = FarmerRating.query.filter_by(
         farmer_id=farmer_id, 
         rater_id=current_user.id
     ).first()
-    
+
     if existing_rating:
         # Update existing rating
         existing_rating.rating = rating
@@ -551,10 +534,10 @@ def rate_farmer(farmer_id):
             comment=comment
         )
         db.session.add(new_rating)
-    
+
     db.session.commit()
     flash('Rating submitted successfully!', 'success')
-    
+
     # Redirect back to referring page or farmer profile
     return redirect(request.referrer or url_for('index'))
 
@@ -567,32 +550,32 @@ def projects():
     min_funding = form.min_funding.data
     max_funding = form.max_funding.data
     location = form.location.data
-    
+
     # Base query
     project_query = Project.query
-    
+
     # Apply filters
     if query:
         project_query = project_query.filter(
             (Project.title.ilike(f'%{query}%')) | 
             (Project.description.ilike(f'%{query}%'))
         )
-    
+
     if category:
         project_query = project_query.filter(Project.category == category)
-    
+
     if min_funding:
         project_query = project_query.filter(Project.funding_goal >= min_funding)
-    
+
     if max_funding:
         project_query = project_query.filter(Project.funding_goal <= max_funding)
-    
+
     if location:
         project_query = project_query.filter(Project.location.ilike(f'%{location}%'))
-    
+
     # Get results and order by newest first
     projects = project_query.order_by(Project.created_at.desc()).all()
-    
+
     return render_template('projects.html', 
                           title='Projects', 
                           app_name=APP_NAME,
@@ -606,12 +589,12 @@ def new_project():
     if current_user.user_type != 'farmer':
         flash('Only farmers can create projects.', 'danger')
         return redirect(url_for('dashboard'))
-    
+
     form = ProjectForm()
     if form.validate_on_submit():
         # Calculate end date based on duration
         end_date = datetime.datetime.utcnow() + datetime.timedelta(days=form.duration.data)
-        
+
         project = Project(
             farmer_id=current_user.id,
             title=form.title.data,
@@ -622,13 +605,13 @@ def new_project():
             category=form.category.data,
             end_date=end_date
         )
-        
+
         db.session.add(project)
         db.session.commit()
-        
+
         flash('Your project has been created!', 'success')
         return redirect(url_for('project_detail', project_id=project.id))
-    
+
     return render_template('project_detail.html', 
                           title='New Project', 
                           app_name=APP_NAME,
@@ -640,7 +623,7 @@ def project_detail(project_id):
     """Project detail route."""
     project = Project.query.get_or_404(project_id)
     farmer = project.farmer
-    
+
     # Editing project
     form = None
     if current_user.is_authenticated and current_user.id == project.farmer_id:
@@ -652,10 +635,10 @@ def project_detail(project_id):
             project.duration = form.duration.data
             project.location = form.location.data
             project.category = form.category.data
-            
+
             # Update end date based on new duration
             project.end_date = datetime.datetime.utcnow() + datetime.timedelta(days=form.duration.data)
-            
+
             db.session.commit()
             flash('Your project has been updated!', 'success')
             return redirect(url_for('project_detail', project_id=project_id))
@@ -666,7 +649,7 @@ def project_detail(project_id):
             form.duration.data = project.duration
             form.location.data = project.location
             form.category.data = project.category
-    
+
     # Investment form
     investment_form = None
     if current_user.is_authenticated and current_user.user_type == 'investor':
@@ -677,26 +660,26 @@ def project_detail(project_id):
                 project_id=project_id,
                 amount=investment_form.amount.data
             )
-            
+
             db.session.add(investment)
             db.session.commit()
-            
+
             flash('Your investment has been submitted!', 'success')
             return redirect(url_for('project_detail', project_id=project_id))
-    
+
     # Get project investments and farmer information
     investments = project.investments.all()
     total_invested = project.total_invested
     progress = project.funding_percentage
-    
+
     # Get farmer credibility score
     credibility_score = RecommendationEngine.get_farmer_credibility_score(farmer.id)
-    
+
     # Get connection status if user is an investor
     connection_status = None
     if current_user.is_authenticated and current_user.user_type == 'investor':
         connection_status = current_user.get_connection_status(farmer)
-    
+
     return render_template('project_detail.html', 
                           title=project.title, 
                           app_name=APP_NAME,
@@ -718,10 +701,10 @@ def opportunities():
     if current_user.user_type != 'investor':
         flash('Only investors can view opportunities.', 'danger')
         return redirect(url_for('dashboard'))
-    
+
     # Get recommended projects using the recommendation engine
     recommended_projects = RecommendationEngine.recommend_projects_to_investor(current_user.id)
-    
+
     return render_template('opportunities.html', 
                           title='Investment Opportunities', 
                           app_name=APP_NAME,
@@ -734,12 +717,12 @@ def admin():
     if current_user.user_type != 'admin':
         flash('You do not have admin privileges.', 'danger')
         return redirect(url_for('dashboard'))
-    
+
     users = User.query.all()
     farmers = User.query.filter_by(user_type='farmer').all()
     investors = User.query.filter_by(user_type='investor').all()
     projects = Project.query.all()
-    
+
     return render_template('admin.html', 
                           title='Admin Panel', 
                           app_name=APP_NAME,
@@ -753,22 +736,22 @@ def admin():
 def request_connection(user_id):
     """Request connection with another user."""
     user = User.query.get_or_404(user_id)
-    
+
     # Prevent connecting with self or between same user types
     if user.id == current_user.id:
         flash('You cannot connect with yourself.', 'danger')
         return redirect(request.referrer or url_for('dashboard'))
-    
+
     if user.user_type == current_user.user_type:
         flash(f'You cannot connect with another {current_user.user_type}.', 'danger')
         return redirect(request.referrer or url_for('dashboard'))
-    
+
     # Send connection request
     if current_user.request_connection(user):
         flash(f'Connection request sent to {user.username}!', 'success')
     else:
         flash(f'Connection request could not be sent. You may already have a connection with {user.username}.', 'warning')
-    
+
     return redirect(request.referrer or url_for('dashboard'))
 
 @app.route('/accept_connection/<int:user_id>', methods=['POST'])
@@ -776,12 +759,12 @@ def request_connection(user_id):
 def accept_connection(user_id):
     """Accept connection request from another user."""
     user = User.query.get_or_404(user_id)
-    
+
     if current_user.accept_connection(user):
         flash(f'You are now connected with {user.username}!', 'success')
     else:
         flash('Connection request could not be accepted.', 'danger')
-    
+
     return redirect(request.referrer or url_for('dashboard'))
 
 @app.route('/reject_connection/<int:user_id>', methods=['POST'])
@@ -789,12 +772,12 @@ def accept_connection(user_id):
 def reject_connection(user_id):
     """Reject connection request from another user."""
     user = User.query.get_or_404(user_id)
-    
+
     if current_user.reject_connection(user):
         flash(f'Connection request from {user.username} has been rejected.', 'info')
     else:
         flash('Connection request could not be rejected.', 'danger')
-    
+
     return redirect(request.referrer or url_for('dashboard'))
 
 @app.route('/contact', methods=['GET', 'POST'])
@@ -806,7 +789,7 @@ def contact():
         # In a real app, you would send an email or store the message
         flash('Your message has been sent! We will get back to you soon.', 'success')
         return redirect(url_for('contact'))
-    
+
     return render_template('contact.html', title='Contact Us', app_name=APP_NAME, form=form)
 
 @app.route('/message/<int:recipient_id>', methods=['GET', 'POST'])
@@ -814,12 +797,12 @@ def contact():
 def send_message(recipient_id):
     """Route for sending messages between users."""
     recipient = User.query.get_or_404(recipient_id)
-    
+
     # Check if users are connected
     if not current_user.is_connected_with(recipient_id) and current_user.user_type != 'admin':
         flash('You need to be connected with this user to send a message.', 'danger')
         return redirect(url_for('dashboard'))
-    
+
     form = MessageForm()
     if form.validate_on_submit():
         message = Message(
@@ -828,13 +811,13 @@ def send_message(recipient_id):
             subject=form.subject.data,
             content=form.content.data
         )
-        
+
         db.session.add(message)
         db.session.commit()
-        
+
         flash('Your message has been sent!', 'success')
         return redirect(url_for('chat', user_id=recipient_id))
-    
+
     return render_template('send_message.html', 
                           title=f'Message to {recipient.username}', 
                           app_name=APP_NAME,
@@ -846,33 +829,33 @@ def send_message(recipient_id):
 def chat(user_id):
     """Chat interface for communicating with connected users."""
     chat_partner = User.query.get_or_404(user_id)
-    
+
     # Check if users are connected (admins can chat with anyone)
     if not current_user.is_connected_with(user_id) and current_user.user_type != 'admin':
         flash('You need to be connected with this user to chat.', 'danger')
         return redirect(url_for('dashboard'))
-    
+
     # Get conversation messages
     sent_messages = Message.query.filter_by(
         sender_id=current_user.id, 
         recipient_id=user_id
     ).order_by(Message.created_at).all()
-    
+
     received_messages = Message.query.filter_by(
         sender_id=user_id, 
         recipient_id=current_user.id
     ).order_by(Message.created_at).all()
-    
+
     # Mark received messages as read
     for message in received_messages:
         if not message.read:
             message.read = True
-    
+
     db.session.commit()
-    
+
     # Combine and sort messages by timestamp
     messages = sorted(sent_messages + received_messages, key=lambda x: x.created_at)
-    
+
     return render_template('chat.html', 
                           title=f'Chat with {chat_partner.username}', 
                           app_name=APP_NAME,
@@ -881,7 +864,6 @@ def chat(user_id):
 
 # Import Flask-SocketIO functions
 from flask_socketio import emit, join_room
-
 # WebSocket setup for chat
 @socketio.on('send_message')
 def handle_message(data):
@@ -890,15 +872,15 @@ def handle_message(data):
     recipient_id = data.get('recipient_id')
     content = data.get('content')
     subject = data.get('subject', 'Chat message')
-    
+
     # Validate data
     if not all([sender_id, recipient_id, content]):
         return
-    
+
     # Verify sender identity matches current user
     if int(sender_id) != current_user.id:
         return
-    
+
     # Create and save the message
     message = Message(
         sender_id=int(sender_id),
@@ -906,10 +888,10 @@ def handle_message(data):
         subject=subject,
         content=content
     )
-    
+
     db.session.add(message)
     db.session.commit()
-    
+
     # Emit message to recipient's room
     emit('new_message', {
         'id': message.id,
