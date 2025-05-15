@@ -26,17 +26,7 @@
     width: 200%;
     height: 200%;
     background: radial-gradient(circle, rgba(127, 90, 240, 0.1) 0%, rgba(22, 22, 26, 0) 70%);
-    animation: rotate 30s linear infinite;
     z-index: -1;
-}
-
-@keyframes rotate {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
 }
 
 /* Modern Stats Cards */
@@ -50,7 +40,6 @@
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     overflow: hidden;
     z-index: 1;
@@ -65,17 +54,7 @@
     height: 100%;
     background: linear-gradient(135deg, rgba(44, 182, 125, 0.1), rgba(127, 90, 240, 0.1));
     z-index: -1;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
-
-.stats-card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-}
-
-.stats-card:hover::after {
-    opacity: 1;
+    opacity: 0.2;
 }
 
 .stats-icon {
@@ -88,11 +67,6 @@
     background-clip: text;
     text-fill-color: transparent;
     display: inline-block;
-    transition: transform 0.4s ease;
-}
-
-.stats-card:hover .stats-icon {
-    transform: scale(1.2);
 }
 
 .stats-number {
@@ -162,55 +136,18 @@
     position: absolute;
     border-radius: 50%;
     background: linear-gradient(135deg, rgba(44, 182, 125, 0.1), rgba(127, 90, 240, 0.1));
-    animation: float 10s ease-in-out infinite;
     z-index: -1;
     opacity: 0.3;
 }
 
-@keyframes float {
-    0% {
-        transform: translateY(0) translateX(0) scale(1);
-    }
-    50% {
-        transform: translateY(-20px) translateX(10px) scale(1.1);
-    }
-    100% {
-        transform: translateY(0) translateX(0) scale(1);
-    }
+/* Pulse Effect - Static Version */
+.pulse-on-hover {
+    box-shadow: 0 0 15px rgba(44, 182, 125, 0.3);
 }
 
-/* Pulse Animation */
-.pulse-on-hover:hover {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(44, 182, 125, 0.4);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(44, 182, 125, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(44, 182, 125, 0);
-    }
-}
-
-/* Stats Card Click Animation */
+/* Stats Card Static Effect */
 .stats-card-clicked {
-    animation: click-pulse 0.3s forwards;
-}
-
-@keyframes click-pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(0.95);
-    }
-    100% {
-        transform: scale(1);
-    }
+    box-shadow: 0 5px 15px rgba(44, 182, 125, 0.4);
 }
 
 /* Chart Container Styles */
@@ -227,12 +164,7 @@
     -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.05);
     padding: 1rem;
-    transition: all 0.3s ease;
-}
-
-.chart-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .chart-title {
@@ -269,12 +201,10 @@
 
 .data-table tbody tr {
     background: rgba(36, 38, 41, 0.5);
-    transition: all 0.3s ease;
 }
 
 .data-table tbody tr:hover {
     background: rgba(44, 182, 125, 0.1);
-    transform: scale(1.01);
 }
 
 .data-table td {
@@ -297,12 +227,6 @@
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
-}
-
-.badge-modern:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
 .badge-success {
@@ -345,7 +269,6 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    transition: all 0.3s ease;
     z-index: 1;
 }
 
@@ -358,19 +281,12 @@
     height: 100%;
     background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
     z-index: -1;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s ease;
+    opacity: 0.1;
 }
 
 .btn-modern:hover {
     color: var(--text-primary);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-    transform: translateY(-3px);
-}
-
-.btn-modern:hover::before {
-    transform: scaleX(1);
+    background: linear-gradient(145deg, rgba(44, 182, 125, 0.3), rgba(22, 22, 26, 0.7));
 }
 
 /* Dashboard Action Buttons */
