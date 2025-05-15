@@ -52,6 +52,34 @@ def login():
     
     form = LoginForm()
     if form.validate_on_submit():
+        # First check if admin needs to be created
+        if form.email.data == 'admin@gmail.com' and form.password.data == 'admin123':
+            # Check if admin exists
+            admin = User.query.filter_by(email='admin@gmail.com').first()
+            if not admin:
+                # Create admin user
+                admin = User(
+                    username='admin',
+                    email='admin@gmail.com',
+                    user_type='admin'
+                )
+                admin.set_password('admin123')
+                db.session.add(admin)
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    flash('Error creating admin user.', 'danger')
+                    return render_template('login.html', title='Login', app_name=APP_NAME, form=form)
+            
+            # Login the admin
+            login_user(admin)
+            admin.last_login = datetime.datetime.utcnow()
+            db.session.commit()
+            flash('Admin login successful!', 'success')
+            return redirect(url_for('dashboard'))
+        
+        # Regular user login
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
             # Update last login time
