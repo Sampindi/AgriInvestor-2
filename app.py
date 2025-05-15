@@ -26,20 +26,9 @@ socketio = SocketIO(cors_allowed_origins="*", async_mode=None)
 # Create the Flask app
 app = Flask(__name__)
 
-# Configure PostgreSQL database from environment variable
-database_url = os.environ.get("DATABASE_URL")
-if database_url:
-    # Use DATABASE_URL if available
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-        "pool_recycle": 300,
-        "pool_pre_ping": True,
-    }
-else:
-    # Fallback to SQLite for development
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///farmlink.db"
-    logger.warning("DATABASE_URL not found, using SQLite instead.")
-    
+# Configure SQLite database
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///farmlink.db"
+logger.info("Using SQLite database")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Set secret key
