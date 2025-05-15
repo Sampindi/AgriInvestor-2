@@ -979,11 +979,7 @@ def clear_activities():
         Activity.query.delete()
         db.session.commit()
         
-        # Emit activity cleared event to admin room
-        socketio.emit('activities_cleared', {
-            'success': True,
-            'message': 'All activities have been cleared'
-        }, room='admin_room')
+        # Activities cleared successfully - no need for WebSocket here as we use polling
         
         return jsonify({
             'success': True,

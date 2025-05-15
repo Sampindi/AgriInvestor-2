@@ -1,16 +1,21 @@
-// Admin Activities - Real-time activity tracking for admin dashboard
+// Admin Activities - Activity tracking for admin dashboard
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize activity feed if we're on the admin dashboard
     if (document.getElementById('activity-feed')) {
         initializeActivityFeed();
-        setupSocketListeners();
+        setupPolling();
         setupClearActivitiesButton();
     }
 });
 
 // Initialize the activity feed by loading recent activities
 function initializeActivityFeed() {
+    loadActivities();
+}
+
+// Load activities from the server
+function loadActivities() {
     fetch('/admin/activities')
         .then(response => {
             if (!response.ok) {
@@ -29,6 +34,12 @@ function initializeActivityFeed() {
             console.error('Error loading activities:', error);
             showNoActivitiesMessage();
         });
+}
+
+// Set up polling for activity updates
+function setupPolling() {
+    // Poll for new activities every 5 seconds
+    setInterval(loadActivities, 5000);
 }
 
 // Render activities in the activity feed
@@ -78,12 +89,7 @@ function createActivityItem(activity) {
     
     const activityTime = document.createElement('div');
     activityTime.className = 'activity-time';
-    // Handle both function and property versions of time_ago
-    if (typeof activity.time_ago === 'function') {
-        activityTime.textContent = activity.time_ago();
-    } else {
-        activityTime.textContent = activity.time_ago || ''; 
-    }
+    activityTime.textContent = activity.time_ago || '';
     
     activityContent.appendChild(activityTitle);
     activityContent.appendChild(activityDescription);
@@ -93,83 +99,6 @@ function createActivityItem(activity) {
     activityItem.appendChild(activityContent);
     
     return activityItem;
-}
-
-// Set up WebSocket listeners for real-time updates
-function setupSocketListeners() {
-    // Make sure socket.io is loaded
-    if (typeof io === 'undefined') {
-        console.error('Socket.IO not loaded');
-        return;
-    }
-    
-    // Connect with reconnection enabled and timeout increased
-    const socket = io({
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionAttempts: 10,
-        timeout: 20000
-    });
-    
-    // Handle connection errors
-    socket.on('connect_error', function(error) {
-        console.error('Socket.IO connection error:', error);
-    });
-    
-    // Handle disconnection
-    socket.on('disconnect', function(reason) {
-        console.log('Socket.IO disconnected:', reason);
-        if (reason === 'io server disconnect') {
-            // Reconnect if the server disconnected us
-            socket.connect();
-        }
-    });
-    
-    // Listen for new activity events
-    socket.on('new_activity', function(activityData) {
-        // Convert activity_type to type for consistency
-        const activity = activityData;
-        if (activityData.activity_type && !activityData.type) {
-            activity.type = activityData.activity_type;
-        }
-        // Get the activity feed
-        const activityFeed = document.getElementById('activity-feed');
-        const noActivitiesMessage = document.getElementById('no-activities-message');
-        
-        // Hide the no activities message if it's visible
-        noActivitiesMessage.style.display = 'none';
-        
-        // Create the new activity item
-        const activityItem = createActivityItem(activity);
-        
-        // Add the new activity to the top of the feed
-        if (activityFeed.firstChild) {
-            activityFeed.insertBefore(activityItem, activityFeed.firstChild);
-        } else {
-            activityFeed.appendChild(activityItem);
-        }
-        
-        // Highlight the new activity
-        setTimeout(() => {
-            activityItem.classList.add('highlight');
-            setTimeout(() => {
-                activityItem.classList.remove('highlight');
-            }, 2000);
-        }, 100);
-        
-        // Trim the feed if it gets too long (keep the most recent 20)
-        const activityItems = activityFeed.querySelectorAll('.activity-item');
-        if (activityItems.length > 20) {
-            for (let i = 20; i < activityItems.length; i++) {
-                activityFeed.removeChild(activityItems[i]);
-            }
-        }
-    });
-    
-    // Listen for activities cleared event
-    socket.on('activities_cleared', function() {
-        showNoActivitiesMessage();
-    });
 }
 
 // Set up the clear activities button
@@ -201,9 +130,8 @@ function clearActivities() {
         return response.json();
     })
     .then(data => {
-        if (data.success) {
-            showNoActivitiesMessage();
-        }
+        // Reload activities after clearing
+        loadActivities();
     })
     .catch(error => {
         console.error('Error clearing activities:', error);
