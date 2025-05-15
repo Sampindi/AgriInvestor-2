@@ -22,7 +22,12 @@ APP_NAME = "AgriBridge"
 def index():
     """Homepage route."""
     # Get featured projects (limit to 6)
-    featured_projects = Project.query.order_by(Project.created_at.desc()).limit(6).all()
+    try:
+        featured_projects = Project.query.order_by(Project.created_at.desc()).limit(6).all()
+    except Exception as e:
+        logger.error(f"Error retrieving projects: {e}")
+        featured_projects = []
+        
     return render_template('index.html', 
                           title='Home', 
                           app_name=APP_NAME,
@@ -31,7 +36,11 @@ def index():
 @app.route('/about')
 def about():
     """About page route."""
-    return render_template('about.html', title='About Us', app_name=APP_NAME)
+    try:
+        return render_template('about.html', title='About Us', app_name=APP_NAME)
+    except Exception as e:
+        logger.error(f"Error displaying about page: {e}")
+        return "Unable to display About page due to a server error. Please try again later.", 500
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

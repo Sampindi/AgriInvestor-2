@@ -21,7 +21,7 @@ class Base(DeclarativeBase):
 
 # Initialize extensions
 db = SQLAlchemy(model_class=Base)
-socketio = SocketIO(async_mode='threading', ping_timeout=10, ping_interval=5)
+socketio = SocketIO(cors_allowed_origins="*", async_mode=None)
 
 # Create the Flask app
 app = Flask(__name__)
@@ -42,7 +42,7 @@ logger.info("Initializing Flask application with configurations")
 
 # Initialize extensions with app
 db.init_app(app)
-socketio.init_app(app, cors_allowed_origins="*", ping_timeout=10, ping_interval=5)
+socketio.init_app(app)
 
 # Initialize login manager
 login_manager = LoginManager()

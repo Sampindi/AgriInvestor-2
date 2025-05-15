@@ -17,7 +17,7 @@ from routes import *
 
 # Run the app with socketio
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True, allow_unsafe_werkzeug=True, use_reloader=True, log_output=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True, allow_unsafe_werkzeug=True)
 else:
     # For Gunicorn compatibility
     from app import app as application
