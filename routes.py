@@ -211,7 +211,11 @@ def dashboard():
 @login_required
 def profile():
     """User profile route."""
-    if current_user.user_type == 'farmer':
+    if current_user.user_type == 'admin':
+        # Admin doesn't have a profile page, redirect to dashboard
+        flash('Admin users do not have a profile page.', 'info')
+        return redirect(url_for('dashboard'))
+    elif current_user.user_type == 'farmer':
         form = FarmerProfileForm()
 
         if form.validate_on_submit():
