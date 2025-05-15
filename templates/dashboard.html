@@ -251,12 +251,11 @@
                                     {% endif %}
                                 </div>
                             </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <p>Your profile is not complete. Please <a href="{{ url_for('profile') }}">complete your profile</a> to get the most out of AgriConnect.</p>
+                            </div>
                         {% endif %}
-                    {% else %}
-                        <div class="alert alert-info">
-                            <p>Your profile is not complete. Please <a href="{{ url_for('profile') }}">complete your profile</a> to get the most out of AgriConnect.</p>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
 
