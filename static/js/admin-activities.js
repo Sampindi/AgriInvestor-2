@@ -19,8 +19,10 @@ function initializeActivityFeed() {
             return response.json();
         })
         .then(data => {
-            if (data.success) {
+            if (data.success || Array.isArray(data.activities)) {
                 renderActivities(data.activities);
+            } else {
+                showNoActivitiesMessage();
             }
         })
         .catch(error => {
@@ -76,7 +78,12 @@ function createActivityItem(activity) {
     
     const activityTime = document.createElement('div');
     activityTime.className = 'activity-time';
-    activityTime.textContent = activity.time_ago;
+    // Handle both function and property versions of time_ago
+    if (typeof activity.time_ago === 'function') {
+        activityTime.textContent = activity.time_ago();
+    } else {
+        activityTime.textContent = activity.time_ago || ''; 
+    }
     
     activityContent.appendChild(activityTitle);
     activityContent.appendChild(activityDescription);
@@ -96,10 +103,35 @@ function setupSocketListeners() {
         return;
     }
     
-    const socket = io();
+    // Connect with reconnection enabled and timeout increased
+    const socket = io({
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 10,
+        timeout: 20000
+    });
+    
+    // Handle connection errors
+    socket.on('connect_error', function(error) {
+        console.error('Socket.IO connection error:', error);
+    });
+    
+    // Handle disconnection
+    socket.on('disconnect', function(reason) {
+        console.log('Socket.IO disconnected:', reason);
+        if (reason === 'io server disconnect') {
+            // Reconnect if the server disconnected us
+            socket.connect();
+        }
+    });
     
     // Listen for new activity events
-    socket.on('new_activity', function(activity) {
+    socket.on('new_activity', function(activityData) {
+        // Convert activity_type to type for consistency
+        const activity = activityData;
+        if (activityData.activity_type && !activityData.type) {
+            activity.type = activityData.activity_type;
+        }
         // Get the activity feed
         const activityFeed = document.getElementById('activity-feed');
         const noActivitiesMessage = document.getElementById('no-activities-message');
