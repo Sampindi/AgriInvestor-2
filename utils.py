@@ -99,14 +99,5 @@ def record_activity(db, socketio, activity_type, title, description, user_id=Non
     db.session.add(activity)
     db.session.commit()
     
-    # Emit to the admin room for real-time updates
-    socketio.emit('new_activity', {
-        'id': activity.id,
-        'activity_type': activity.activity_type,
-        'user_id': activity.user_id,
-        'title': activity.title,
-        'description': activity.description,
-        'icon': activity.icon,
-        'created_at': activity.created_at.isoformat(),
-        'time_ago': activity.time_ago
-    }, room='admin_room')
+    # We're using polling instead of WebSockets for better reliability
+    # Activities will be retrieved via regular HTTP requests
