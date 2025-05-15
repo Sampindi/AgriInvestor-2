@@ -141,13 +141,14 @@ def create_admin():
                               password="[HIDDEN]")
     
     try:
-        # Use fixed admin password
+        # Use fixed admin credentials
         password = 'admin123'
+        email = 'admin@gmail.com'
         
         # Create the admin user
         admin = User(
             username="admin",
-            email="admin@agribridge.com",
+            email=email,
             user_type='admin'
         )
         admin.set_password(password)
